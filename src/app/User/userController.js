@@ -221,3 +221,25 @@ exports.postUsers = async function(req, res) {
         return res.send(signUpResponse);
     }
 };
+
+/*
+    API No. 5
+    API Name : 로그인 API
+    [POST] /app/login
+    body : phoneNumber
+*/
+exports.login = async function(req, res) {
+    const { phoneNumber } = req.body;
+
+    if (!phoneNumber) {
+        return res.send(response(baseResponse.SIGNIN_PHONENUMBER_EMPTY));
+    } else if (phoneNumber.length < 10) {
+        return res.send(response(baseResponse.SIGNIN_PHONENUMBER_LENGTH));
+    } else if (!regPhoneNumber.test(phoneNumber)) {
+        return res.send(response(baseResponse.SIGNIN_PHONENUMBER_ERROR_TYPE));
+    }
+
+    const signInResponse = await userService.postSignIn(phoneNumber);
+
+    return res.send(signInResponse);
+};

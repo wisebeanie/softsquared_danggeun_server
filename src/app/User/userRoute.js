@@ -14,6 +14,9 @@ module.exports = function(app){
     // 4. 회원가입 API
     app.post('/app/users', user.postUsers);
 
+    // 5. 로그인 API
+    app.post('/app/login', user.login);
+
     // jwt를 사용하기 위해 jwtMiddleware 를 체이닝 방식으로 추가하는 예제
     // app.get('/app/users/:userId', jwtMiddleware, user.getUserById);
 

@@ -32,11 +32,21 @@ module.exports = {
     SIGNUP_PHONENUMBER_ERROR_TYPE : { "isSuccess": false, "code": 2016, "message": "핸드폰번호는 00000000000으로 입력해주세요." },
     SIGNUP_EMAIL_ERROR_TYPE : { "isSuccess": false, "code": 2017, "message": "이메일의 형식을 확인해주세요." },
 
+    SIGNIN_PHONENUMBER_EMPTY : { "isSuccess": false, "code": 2018, "message": "전화번호를 입력해주세요." },
+    SIGNIN_PHONENUMBER_LENGTH : { "isSuccess": false, "code": 2019, "message": "핸드폰번호의 길이는 10자 이상입니다." },
+    SIGNIN_PHONENUMBER_ERROR_TYPE : { "isSuccess": false, "code": 2020, "message": "핸드폰번호는 00000000000으로 입력해주세요." },
+
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
-    
-    SIGNUP_REDUNDANT_PHONENUMBER : { "isSuccess": false, "code": 3002, "message": "이미 가입된 전화번호입니다." },
-    SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3003, "message": "이미 등록된 이메일입니다." },
+    COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},
+
+    SIGNUP_REDUNDANT_PHONENUMBER : { "isSuccess": false, "code": 3003, "message": "이미 가입된 전화번호입니다." },
+    SIGNUP_REDUNDANT_EMAIL : { "isSuccess": false, "code": 3004, "message": "이미 등록된 이메일입니다." },
+
+    SIGNIN_PHONENUMBER_WRONG : { "isSuccess": false, "code": 3005, "message": "전화번호가 잘못되었습니다." },
+    SIGNIN_INACTIVE_ACCOUNT : { "isSuccess": false, "code": 3006, "message": "비활성화 된 계정입니다. 고객센터에 문의해주세요." },
+    SIGNIN_WITHDRAWAL_ACCOUNT : { "isSuccess": false, "code": 3007, "message": "탈퇴 된 계정입니다. 고객센터에 문의해주세요." },
+
 
 
     //Connection, Transaction 등의 서버 오류

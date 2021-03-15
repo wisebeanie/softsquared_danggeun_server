@@ -21,6 +21,9 @@ exports.createUser = async function (nickName, phoneNumber, profileImgUrl, town,
             return errResponse(baseResponse.SIGNUP_REDUNDANT_PHONENUMBER);
         }
 
+        // TODO
+        // contryIdx 존재 여부 확인
+
         const insertUserInfoParams = [nickName, phoneNumber, profileImgUrl, town, countryIdx];
 
         const connection = await pool.getConnection(async (conn) => conn);
@@ -30,6 +33,42 @@ exports.createUser = async function (nickName, phoneNumber, profileImgUrl, town,
         return response(baseResponse.SUCCESS, {"추가된 회원": userIdResult[0].insertId});
     } catch (err) {
         logger.error(`App - createUser Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};
+
+exports.postSignIn = async function(phoneNumber) {
+    try {
+        // 전화번호 존재 여부 확인
+        const phoneNumberRows = await userProvider.phoneNumberCheck(phoneNumber);
+        if (phoneNumberRows.length < 1) {
+            return errResponse(baseResponse.SIGNIN_PHONENUMBER_WRONG);
+        }
+
+        const selectPhoneNumber = phoneNumberRows[0].phoneNumber;
+
+        const userAccountRows = await userProvider.accountCheck(selectPhoneNumber);
+
+        if (userAccountRows[0].status === "INACTIVE") {
+            return errResponse(baseResponse.SIGNIN_INACTIVE_ACCOUNT);
+        } else if (userAccountRows[0].status === "DELETED") {
+            return errResponse(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT);
+        }
+
+        let token = await jwt.sign(
+            {
+                userIdx: userAccountRows[0].idx,
+            },
+            secret_config.jwtsecret,
+            {
+                expiresIn: "365d",
+                subject: "userInfo",
+            }
+        );
+
+        return response(baseResponse.SUCCESS, {'userIdx': userAccountRows[0].idx, 'jwt': token});
+    } catch(err) {
+        logger.error(`App - postSignIn Service error\n: ${err.message}`);
         return errResponse(baseResponse.DB_ERROR);
     }
 };
