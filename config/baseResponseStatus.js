@@ -18,7 +18,7 @@ module.exports = {
     AUTH_EMAIL_ERROR_TYPE : { "isSuccess": false, "code": 2006, "message": "이메일의 형식을 확인해주세요." },
     
     AUTH_ADDRESS_EMPTY : { "isSuccess": false, "code": 2007, "message": "주소를 입력해주세요(동까지만)" },
-    
+    AUTH_ADDRESS_ERROR_TYPE : { "isSuccess": false, "code": 2008, "message": "주소는 동으로 끝내주세요" },
     
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },

@@ -14,6 +14,7 @@ const { smtpTransport } = require('../../../config/email');
 const queryString = require('querystring');
 
 var regPhoneNumber = /^\d{3}\d{3,4}\d{4}$/;
+var regAddress = /.*\s*동/;
 
 /**
  * API No. 1
@@ -149,6 +150,8 @@ exports.authGetTown = function(req, res) {
 
     if (!address) {
         return res.send(response(baseResponse.AUTH_ADDRESS_EMPTY));
+    } else if (!regAddress.test(address)) {
+        return res.send(response(baseResponse.AUTH_ADDRESS_ERROR_TYPE));
     }
 
     const encodedAddress = queryString.escape(address);
@@ -175,7 +178,7 @@ exports.authGetTown = function(req, res) {
         if (town.length < 1) {
             return res.send(response(baseResponse.ADDRESS_NOT_EXIST));
         }
-        
+
         return res.send(response(baseResponse.SUCCESS, {"지역": town}));
     });
 };
