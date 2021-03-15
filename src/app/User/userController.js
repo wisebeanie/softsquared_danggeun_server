@@ -171,6 +171,11 @@ exports.authGetTown = function(req, res) {
         for (document of kakaoPlaces.documents) {
             town.push(document.address_name);
         }
+        
+        if (town.length < 1) {
+            return res.send(response(baseResponse.ADDRESS_NOT_EXIST));
+        }
+        
         return res.send(response(baseResponse.SUCCESS, {"지역": town}));
     });
 };
