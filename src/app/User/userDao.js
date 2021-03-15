@@ -11,13 +11,24 @@ async function selectUser(connection) {
 // 이메일로 회원 조회
 async function selectUserEmail(connection, email) {
   const selectUserEmailQuery = `
-                SELECT email, nickname 
-                FROM UserInfo 
+                SELECT nickName 
+                FROM User
                 WHERE email = ?;
                 `;
   const [emailRows] = await connection.query(selectUserEmailQuery, email);
   return emailRows;
-}
+};
+
+// 전화번호로 회원 조회
+async function selectUserPhoneNumber(connection, phoneNumber) {
+    const selectUserPhoneNumberQuery = `
+                SELECT nickName
+                FROM User
+                WHERE phoneNumber = ?;
+                `;
+    const [phoneNumberRows] = await connection.query(selectUserPhoneNumberQuery, phoneNumber);
+    return phoneNumberRows;
+};
 
 // userId 회원 조회
 async function selectUserId(connection, userId) {
@@ -31,22 +42,23 @@ async function selectUserId(connection, userId) {
 }
 
 // 유저 생성
-async function insertUserInfo(connection, insertUserInfoParams) {
-  const insertUserInfoQuery = `
-        INSERT INTO UserInfo(email, password, nickname)
-        VALUES (?, ?, ?);
-    `;
-  const insertUserInfoRow = await connection.query(
-    insertUserInfoQuery,
-    insertUserInfoParams
-  );
+async function insertUser(connection, insertUserParams) {
+  const insertUserQuery = `
+        INSERT INTO User(nickName, phoneNumber, email, town, countryIdx)
+        VALUES (?, ?, ?, ?, ?);
+        `;
+    const insertUserRow = await connection.query(
+        insertUserQuery,
+        insertUserParams
+    );
 
-  return insertUserInfoRow;
+    return insertUserRow;
 }
 
 module.exports = {
   selectUser,
   selectUserEmail,
   selectUserId,
-  insertUserInfo,
+  insertUser,
+  selectUserPhoneNumber
 };

@@ -1,6 +1,6 @@
 const jwtMiddleware = require("../../../config/jwtMiddleware");
-const userProvider = require("../../app/User/userProvider");
-const userService = require("../../app/User/userService");
+const userProvider = require("./userProvider");
+const userService = require("./userService");
 const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
 const request = require('request');
@@ -12,6 +12,7 @@ const crypto = require('crypto');
 const { smtpTransport } = require('../../../config/email');
 
 const queryString = require('querystring');
+const { count } = require("console");
 
 var regPhoneNumber = /^\d{3}\d{3,4}\d{4}$/;
 var regAddress = /.*\s*동/;
@@ -188,6 +189,37 @@ exports.authGetTown = function(req, res) {
     API Name : 회원가입 API
     [POST] /app/users
 */
-// exports.postUsers = function(req, res) {
+exports.postUsers = async function(req, res) {
+    /*
+        Body : nickName, phoneNumber, email, town, countryIdx
+    */
+    const {nickName, phoneNumber, email, town, countryIdx} = req.body;
 
-// }
+    if (!nickName) {
+        return res.send(response(baseResponse.SIGNUP_NICKNAME_EMPTY));
+    } else if (!phoneNumber) {
+        return res.send(response(baseResponse.SIGNUP_PHONENUMBER_EMPTY));
+    } else if (!email) {
+        return res.send(response(baseResponse.SIGNUP_EMAIL_EMPTY));
+    } else if (!town) {
+        return res.send(response(baseResponse.SIGNUP_TOWN_EMPTY));
+    } else if (!countryIdx) {
+        return res.send(response(baseResponse.SIGNUP_COUNTRYIDX_EMPTY));
+    }
+
+    if (email.length > 30) {
+        return res.send(response(baseResponse.SIGNUP_EMAIL_LENGTH));
+    } else if (phoneNumber.length < 10) {
+        return res.send(response(baseResponse.SIGNUP_PHONENUMBER_LENGTH));
+    }
+
+    if (!regPhoneNumber.test(phoneNumber)) {
+        return res.send(response(baseResponse.SIGNUP_PHONENUMBER_ERROR_TYPE));
+    } else if (!regexEmail.test(email)) {
+        return res.send(response(baseResponse.SIGNUP_EMAIL_ERROR_TYPE));
+    }
+
+    const signUpResponse = await userService.createUser(nickName, phoneNumber, email, town, countryIdx);
+
+    return res.send(signUpResponse);
+};
