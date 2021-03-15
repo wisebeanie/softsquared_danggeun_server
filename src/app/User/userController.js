@@ -211,15 +211,47 @@ exports.postUsers = async function(req, res) {
 
     if (!regPhoneNumber.test(phoneNumber)) {
         return res.send(response(baseResponse.SIGNUP_PHONENUMBER_ERROR_TYPE));
+    } else if (!regAddress.test(town)) {
+        return res.send(response(baseResponse.SIGNUP_ADDRESS_ERROR_TYPE));
     }
 
-    if (!profileImgUrl) {
-        const signUpResponse = await userService.createUser(nickName, phoneNumber, "BASICIMGURL", town, countryIdx);
-        return res.send(signUpResponse);
-    } else {
-        const signUpResponse = await userService.createUser(nickName, phoneNumber, profileImgUrl, town, countryIdx);
-        return res.send(signUpResponse);
-    }
+    const encodedTown = queryString.escape(town);
+
+    const kakaoOptions = {
+        url: `https://dapi.kakao.com/v2/local/search/address.json?query=${encodedTown}`,
+        method: 'GET',
+        headers: {
+            'Authorization': 'KakaoAK e343cf5efb2c897511358685c027474c'
+        },
+        encoding: 'utf-8'
+    };
+
+    request(kakaoOptions, async function (err, responses, body) {
+        if (err) {
+            console.log(err);
+            return res.send(response(baseResponse.SERVER_ERROR));
+        }
+        var addresses = [];
+        const kakaoPlaces = JSON.parse(body);
+        for (document of kakaoPlaces.documents) {
+            addresses.push(document.address_name);
+        }
+        
+        if (addresses.length > 1 || addresses.length == 0) {
+            return res.send(response(baseResponse.SIGNUP_ADDRESS_WRONG));
+        } else {
+            const town = kakaoPlaces.documents[0].address_name;
+            const longitude = kakaoPlaces.documents[0].x;
+            const latitude = kakaoPlaces.documents[0].y;
+            if (!profileImgUrl) {
+                const signUpResponse = await userService.createUser(nickName, phoneNumber, "BASICIMGURL", town, countryIdx, longitude, latitude);
+                return res.send(signUpResponse);
+            } else {
+                const signUpResponse = await userService.createUser(nickName, phoneNumber, profileImgUrl, town, countryIdx, longitude, latitude);
+                return res.send(signUpResponse);
+            }
+        }
+    });
 };
 
 /*

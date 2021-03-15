@@ -36,6 +36,8 @@ module.exports = {
     SIGNIN_PHONENUMBER_LENGTH : { "isSuccess": false, "code": 2019, "message": "핸드폰번호의 길이는 10자 이상입니다." },
     SIGNIN_PHONENUMBER_ERROR_TYPE : { "isSuccess": false, "code": 2020, "message": "핸드폰번호는 00000000000으로 입력해주세요." },
 
+    SIGNUP_ADDRESS_ERROR_TYPE : { "isSuccess": false, "code": 2021, "message": "주소는 동으로 끝내주세요" },
+    
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},
@@ -47,7 +49,8 @@ module.exports = {
     SIGNIN_INACTIVE_ACCOUNT : { "isSuccess": false, "code": 3006, "message": "비활성화 된 계정입니다. 고객센터에 문의해주세요." },
     SIGNIN_WITHDRAWAL_ACCOUNT : { "isSuccess": false, "code": 3007, "message": "탈퇴 된 계정입니다. 고객센터에 문의해주세요." },
 
-
+    SIGNUP_ADDRESS_WRONG : { "isSuccess": false, "code": 3008, "message": "정확한 주소를 입력해주세요" },
+    SIGNUP_REDUNDANT_NICKNAME : { "isSuccess": false, "code": 3009, "message": "중복된 닉네임입니다." },
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},

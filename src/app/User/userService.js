@@ -13,7 +13,7 @@ const {connect} = require("http2");
 
 // Service: Create, Update, Delete 비즈니스 로직 처리
 
-exports.createUser = async function (nickName, phoneNumber, profileImgUrl, town, countryIdx) {
+exports.createUser = async function (nickName, phoneNumber, profileImgUrl, town, countryIdx, longitude, latitude) {
     try {
         // 전화번호 중복 확인
         const phoneNumberRows = await userProvider.phoneNumberCheck(phoneNumber);
@@ -21,10 +21,16 @@ exports.createUser = async function (nickName, phoneNumber, profileImgUrl, town,
             return errResponse(baseResponse.SIGNUP_REDUNDANT_PHONENUMBER);
         }
 
+        // 닉네임 중복 확인
+        const nickNameRows = await userProvider.nickNameCheck(nickName);
+        if (nickNameRows.length > 0) {
+            return errResponse(baseResponse.SIGNUP_REDUNDANT_NICKNAME);
+        }
+
         // TODO
         // contryIdx 존재 여부 확인
 
-        const insertUserInfoParams = [nickName, phoneNumber, profileImgUrl, town, countryIdx];
+        const insertUserInfoParams = [nickName, phoneNumber, profileImgUrl, town, countryIdx, longitude, latitude];
 
         const connection = await pool.getConnection(async (conn) => conn);
         const userIdResult = await userDao.insertUser(connection, insertUserInfoParams);

@@ -44,8 +44,8 @@ async function selectUserId(connection, userId) {
 // 유저 생성
 async function insertUser(connection, insertUserParams) {
   const insertUserQuery = `
-        INSERT INTO User(nickName, phoneNumber, profileImgUrl, town, countryIdx)
-        VALUES (?, ?, ?, ?, ?);
+        INSERT INTO User(nickName, phoneNumber, profileImgUrl, town, countryIdx, longitude, latitude)
+        VALUES (?, ?, ?, ?, ?, ?, ?);
         `;
     const insertUserRow = await connection.query(
         insertUserQuery,
@@ -67,11 +67,23 @@ async function selectUserAccount(connection, phoneNumber) {
     return selectUserAccountRow[0];
 };
 
+async function selectUserNickName(connection, nickName) {
+    const selectUserNickNameQuery = `
+                SELECT nickName
+                FROM User
+                WHERE nickName = ?;
+                `;
+    const [nickNameRows] = await connection.query(selectUserNickNameQuery, nickName);
+    return nickNameRows;
+};
+
+
 module.exports = {
   selectUser,
   selectUserEmail,
   selectUserId,
   insertUser,
   selectUserPhoneNumber,
-  selectUserAccount
+  selectUserAccount,
+  selectUserNickName
 };
