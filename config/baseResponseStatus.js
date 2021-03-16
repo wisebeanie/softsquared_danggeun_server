@@ -38,6 +38,10 @@ module.exports = {
 
     SIGNUP_ADDRESS_ERROR_TYPE : { "isSuccess": false, "code": 2021, "message": "주소는 동으로 끝내주세요" },
     
+    AUTH_AUTHNUMBER_EMPTY : { "isSuccess": false, "code": 2022, "message": "인증번호를 입력해주세요." },
+    AUTH_AUTHNUMBER_LENGTH : { "isSuccess": false, "code": 2023, "message": "인증번호의 길이는 4입니다." },
+
+
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},
@@ -51,6 +55,10 @@ module.exports = {
 
     SIGNUP_ADDRESS_WRONG : { "isSuccess": false, "code": 3008, "message": "정확한 주소를 입력해주세요" },
     SIGNUP_REDUNDANT_NICKNAME : { "isSuccess": false, "code": 3009, "message": "중복된 닉네임입니다." },
+
+    AUTH_AUTHNUMBER_NOT_EXIST : { "isSuccess": false, "code": 3010, "message": "해당 번호는 인증번호를 받지 못했습니다." },
+    AUTH_AUTHNUMBER_INCORRECT : { "isSuccess": false, "code": 3011, "message": "인증번호가 틀렸습니다." },
+     
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},

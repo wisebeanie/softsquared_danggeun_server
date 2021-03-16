@@ -17,6 +17,10 @@ const { count } = require("console");
 var regPhoneNumber = /^\d{3}\d{3,4}\d{4}$/;
 var regAddress = /.*\s*동/;
 
+const nodeCache = require('node-cache');
+const { type } = require("os");
+const cache = new nodeCache();
+
 /**
  * API No. 1
  * API Name : 인증번호 전송 API
@@ -29,6 +33,9 @@ exports.authSendPhoneNumber = async function (req, res) {
      */
     const { phoneNumber } = req.body;
     const myPhone = '01047937231';
+
+    // 캐시 데이터 삭제
+    cache.del(phoneNumber);
 
     // 인증번호
     const authNum = Math.floor((Math.random() * (9999 - 1000 + 1)) + 1000);
@@ -95,6 +102,9 @@ exports.authSendPhoneNumber = async function (req, res) {
         if (err) res.send(response(baseResponse.SERVER_ERROR));
     });
 
+    // 캐시 데이터 저장
+    cache.set(phoneNumber, authNum, 600);
+    
     return res.send(response(baseResponse.SUCCESS, {'인증번호': authNum}));
 };
 
@@ -132,11 +142,12 @@ exports.authSendEmail = function(req, res) {
     const result = smtpTransport.sendMail(mailOptions, (error, responses) => {
         if (error) {
             console.log(error);
+            smtpTransport.close();
             return res.send(response(baseResponse.SERVER_ERROR));
         } else {
+            smtpTransport.close();
             return res.send(response(baseResponse.SUCCESS, {"인증번호": authNum}));
         }
-        smtpTransport.close();
     });
 }
 
@@ -275,3 +286,44 @@ exports.login = async function(req, res) {
 
     return res.send(signInResponse);
 };
+
+/*
+    API No. 6
+    API Name : 인증번호 인증 API
+    [POST] /app/auth/certification
+*/
+exports.authCertify = function (req, res) {
+    /*
+        Body : phoneNumber, authNumber
+    */
+    const { phoneNumber, authNumber } = req.body;
+    
+    // 캐시 데이터 조회
+    const value = cache.get(phoneNumber);
+
+    if (!phoneNumber) {
+        return res.send(response(baseResponse.AUTH_PHONENUMBER_EMPTY));
+    } else if (!authNumber) {
+        return res.send(response(baseResponse.AUTH_AUTHNUMBER_EMPTY));
+    }
+
+    if (phoneNumber.length < 10) {
+        return res.send(response(baseResponse.AUTH_PHONENUMBER_LENGTH));
+    } else if (authNumber < 999 || authNumber > 10000) {
+        return res.send(response(baseResponse.AUTH_AUTHNUMBER_LENGTH));
+    }
+
+    if (!regPhoneNumber.test(phoneNumber))
+        return res.send(response(baseResponse.AUTH_PHONENUMBER_ERROR_TYPE));
+
+    if (!value) {
+        res.send(response(baseResponse.AUTH_AUTHNUMBER_NOT_EXIST));
+    } else {
+        if (value != authNumber) {
+            res.send(response(baseResponse.AUTH_AUTHNUMBER_INCORRECT));
+        } else {
+            res.send(response(baseResponse.SUCCESS));
+        }
+    }
+
+}
