@@ -320,10 +320,27 @@ exports.authCertify = function (req, res) {
         res.send(response(baseResponse.AUTH_AUTHNUMBER_NOT_EXIST));
     } else {
         if (value != authNumber) {
-            res.send(response(baseResponse.AUTH_AUTHNUMBER_INCORRECT));
+            return res.send(response(baseResponse.AUTH_AUTHNUMBER_INCORRECT));
         } else {
-            res.send(response(baseResponse.SUCCESS));
+            return res.send(response(baseResponse.SUCCESS));
         }
     }
 
-}
+};
+
+/*
+    API No. 7
+    API Name : 자동 로그인 API
+    [GET] /app/auto-login
+*/
+exports.check = async function (req, res) {
+    // jwt - userIdx
+
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    if (!userIdxFromJWT) {
+        return res.send(errResponse(baseResponse.SIGNIN_JWT_TOKEN_NOT_EXIST));
+    } else {
+        return res.send(response(baseResponse.SUCCESS, {"userIdx": userIdxFromJWT}));
+    }
+};
