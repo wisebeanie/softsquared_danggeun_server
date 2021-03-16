@@ -4,7 +4,7 @@ module.exports = {
     SUCCESS : { "isSuccess": true, "code": 1000, "message":"성공" },
 
     // Common
-    TOKEN_EMPTY : { "isSuccess": false, "code": 2000, "message":"JWT 토큰을 입력해주세." },
+    TOKEN_EMPTY : { "isSuccess": false, "code": 2000, "message":"JWT 토큰을 입력해주세요." },
     TOKEN_VERIFICATION_FAILURE : { "isSuccess": false, "code": 3000, "message":"JWT 토큰 검증 실패" },
     TOKEN_VERIFICATION_SUCCESS : { "isSuccess": true, "code": 1001, "message":"JWT 토큰 검증 성공" }, // ?
 
@@ -44,6 +44,15 @@ module.exports = {
 
     SIGNIN_JWT_TOKEN_NOT_EXIST : { "isSuccess": false, "code": 2024, "message": "해당 jwt토큰이 존재하지 않습니다." },
 
+    ARTICLE_USERIDX_EMPTY : { "isSuccess": false, "code": 2026, "message": "userIdx를 입력해주세요." },
+    ARTICLE_TITLE_EMPTY : { "isSuccess": false, "code": 2027, "message": "제목을 입력해주세요." },
+    ARTICLE_DESCRIPTION_EMPTY : { "isSuccess": false, "code": 2028, "message": "설명을 입력해주세요" },
+    ARTICLE_CATEGORYIDX_EMPTY : { "isSuccess": false, "code": 2029, "message": "카테고리를 입력해주세요" },
+    ARTICLE_TITLE_LENGTH : { "isSuccess": false, "code": 2030, "message": "제목의 길이는 100자 이내로 입력해주세요." },
+    ARTICLE_DESCRIPTION_LENGTH : { "isSuccess": false, "code": 2031, "message": "설명의 길이는 200자 이내로 해주세요." },
+    
+    USER_IDX_NOT_MATCH : { "isSuccess": false, "code": 2032, "message": "userIdx를 확인해주세요."}, 
+ 
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},
