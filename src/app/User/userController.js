@@ -105,7 +105,7 @@ exports.authSendPhoneNumber = async function (req, res) {
     // 캐시 데이터 저장
     cache.set(phoneNumber, authNum, 600);
     
-    return res.send(response(baseResponse.SUCCESS, {'인증번호': authNum}));
+    return res.send(response(baseResponse.SUCCESS, {'authNumber': authNum}));
 };
 
 /*
@@ -146,7 +146,7 @@ exports.authSendEmail = function(req, res) {
             return res.send(response(baseResponse.SERVER_ERROR));
         } else {
             smtpTransport.close();
-            return res.send(response(baseResponse.SUCCESS, {"인증번호": authNum}));
+            return res.send(response(baseResponse.SUCCESS, {"authNumber": authNum}));
         }
     });
 }
@@ -191,7 +191,7 @@ exports.authGetTown = function(req, res) {
             return res.send(response(baseResponse.ADDRESS_NOT_EXIST));
         }
 
-        return res.send(response(baseResponse.SUCCESS, {"지역": town}));
+        return res.send(response(baseResponse.SUCCESS, {"town": town}));
     });
 };
 
