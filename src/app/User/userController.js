@@ -146,6 +146,10 @@ exports.authSendEmail = function(req, res) {
             return res.send(response(baseResponse.SERVER_ERROR));
         } else {
             smtpTransport.close();
+            
+            // 캐시 데이터 저장
+            cache.set(sendEmail, authNum, 600);
+
             return res.send(response(baseResponse.SUCCESS, {"authNumber": authNum}));
         }
     });
@@ -289,10 +293,10 @@ exports.login = async function(req, res) {
 
 /*
     API No. 6
-    API Name : 인증번호 인증 API
-    [POST] /app/auth/certification
+    API Name : 핸드폰 인증번호 인증 API
+    [POST] /app/auth/phonenumber/certification
 */
-exports.authCertify = function (req, res) {
+exports.authPhoneCertify = function (req, res) {
     /*
         Body : phoneNumber, authNumber
     */
@@ -309,8 +313,8 @@ exports.authCertify = function (req, res) {
 
     if (phoneNumber.length < 10) {
         return res.send(response(baseResponse.AUTH_PHONENUMBER_LENGTH));
-    } else if (authNumber < 999 || authNumber > 10000) {
-        return res.send(response(baseResponse.AUTH_AUTHNUMBER_LENGTH));
+    } else if (authNumber < 1000 || authNumber > 10000) {
+        return res.send(response(baseResponse.AUTH_PHONE_AUTHNUMBER_LENGTH));
     }
 
     if (!regPhoneNumber.test(phoneNumber))
@@ -342,5 +346,45 @@ exports.check = async function (req, res) {
         return res.send(errResponse(baseResponse.SIGNIN_JWT_TOKEN_NOT_EXIST));
     } else {
         return res.send(response(baseResponse.SUCCESS, {"userIdx": userIdxFromJWT}));
+    }
+};
+
+/*
+    API No. 8
+    API Name : 이메일 인증번호 인증 API
+    [POST] /app/auth/email/certification
+*/
+exports.authEmailCertify = function (req, res) {
+    /*
+        Body : sendEmail, authNumber
+    */
+    const { sendEmail, authNumber } = req.body;
+    
+    // 캐시 데이터 조회
+    const value = cache.get(sendEmail);
+
+    if (!sendEmail) {
+        return res.send(response(baseResponse.AUTH_EMAIL_EMPTY));
+    } else if (!authNumber) {
+        return res.send(response(baseResponse.AUTH_AUTHNUMBER_EMPTY));
+    }
+
+    if (sendEmail.length > 30) {
+        return res.send(response(baseResponse.AUTH_EMAIL_LENGTH));
+    } else if (authNumber < 100000 || authNumber > 1000000) {
+        return res.send(response(baseResponse.AUTH_EMAIL_AUTHNUMBER_LENGTH));
+    }
+
+    if (!regexEmail.test(sendEmail))
+        return res.send(response(baseResponse.AUTH_EMAIL_ERROR_TYPE));
+
+    if (!value) {
+        res.send(response(baseResponse.AUTH_AUTHNUMBER_NOT_EXIST));
+    } else {
+        if (value != authNumber) {
+            return res.send(response(baseResponse.AUTH_AUTHNUMBER_INCORRECT));
+        } else {
+            return res.send(response(baseResponse.SUCCESS));
+        }
     }
 };
