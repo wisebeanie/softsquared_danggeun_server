@@ -124,7 +124,6 @@ exports.getCategories = async function(req, res) {
     API Name : 글 전체 조회 글 종류에 따라
     [GET] /app/articles?isAd=&userIdx=
 */
-// 추후 거리별 조회를 위해 userIdx 추가
 exports.getArticles = async function(req, res) {
     // Query String = isAd, userIdx
     const userIdx = req.query.userIdx;
@@ -144,6 +143,8 @@ exports.getArticles = async function(req, res) {
 
     const latitude = await userProvider.retrieveLatitude(userIdx);
     const longitude = await userProvider.retrieveLongitude(userIdx);
+
+    
 
     if (isAd == "N") {
         const articleListResult = await articleProvider.retrieveArticleList(latitude.latitude, longitude.longitude);

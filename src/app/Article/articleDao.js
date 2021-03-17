@@ -69,7 +69,8 @@ async function selectLocalAdCategory (connection) {
 
 async function selectArticle (connection, latitude, longitude) {
     const selectArticleQuery = `
-                SELECT title,
+                SELECT Article.idx,
+                    title,
                     case when price = 0
                         then '무료나눔'
                         else price
@@ -91,7 +92,6 @@ async function selectArticle (connection, latitude, longitude) {
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
                         else concat(timestampdiff(month, Article.updatedAt, current_timestamp), '개월 전')
                         end as updateAt,
-                    articleImgUrl,
                     case when liked is null
                         then 0
                         else liked
@@ -111,8 +111,8 @@ async function selectArticle (connection, latitude, longitude) {
                         as distance
                     FROM User
                     HAVING distance <= 4
-                    LIMIT 0,300) point on point.idx = Article.userIdx
-                WHERE isAd = 'N' and Article.status = 'Sale'
+                    LIMIT 0,300) point on point.idx = Article.userIdx 
+                WHERE isAd = 'N' and Article.status = 'Sale'   
                 group by Article.idx;
                 `;
     const [selectArticleRows] = await connection.query(selectArticleQuery, latitude, longitude);
@@ -122,7 +122,8 @@ async function selectArticle (connection, latitude, longitude) {
 
 async function selectLocalAd (connection, latitude, longitude) {
     const selectLocalAdQuery = `
-                SELECT title,
+                SELECT Article.idx,
+                    title,
                     price,
                     case
                         when pullUpStatus = 'N'
@@ -140,7 +141,6 @@ async function selectLocalAd (connection, latitude, longitude) {
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
                         else concat(timestampdiff(month, Article.updatedAt, current_timestamp), '개월 전')
                         end as updateAt,
-                    articleImgUrl,
                     case when liked is null
                         then 0
                         else liked
@@ -155,7 +155,6 @@ async function selectLocalAd (connection, latitude, longitude) {
                         end as commentCount
                 FROM Article
                     left join User on Article.userIdx = User.idx
-                    left join ArticleImg on ArticleImg.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
@@ -174,6 +173,17 @@ async function selectLocalAd (connection, latitude, longitude) {
     return localAdListRows;
 };
 
+async function selectArticleImg(connection, articleIdx) {
+    const selectArticleImgQuery = `
+                SELECT articleImgUrl
+                FROM ArticleImg
+                WHERE articleIdx = ?;
+                `;
+    const [articleImgRows] = await connection.query(selectArticleImgQuery, articleIdx);
+
+    return articleImgRows;
+};
+
 module.exports = {
     insertArticle,
     insertArticleImg,
@@ -182,5 +192,6 @@ module.exports = {
     selectArticleCategory,
     selectLocalAdCategory,
     selectArticle,
-    selectLocalAd
+    selectLocalAd,
+    selectArticleImg
 };

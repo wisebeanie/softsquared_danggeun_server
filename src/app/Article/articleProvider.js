@@ -30,6 +30,11 @@ exports.retrieveLocalAdCategoryList = async function() {
 exports.retrieveArticleList = async function(latitude, longitude) {
     const connection = await pool.getConnection(async (conn) => conn);
     const articleListResult = await articleDao.selectArticle(connection, latitude, longitude);
+    for (article of articleListResult) {
+        const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
+        const img = articleImgResult[0];
+        article.representativeImg = img;
+    }
     connection.release();
 
     return articleListResult;
@@ -38,6 +43,11 @@ exports.retrieveArticleList = async function(latitude, longitude) {
 exports.retrieveLocalAdList = async function(latitude, longitude) {
     const connection = await pool.getConnection(async (conn) => conn);
     const localAdListResult = await articleDao.selectLocalAd(connection, latitude, longitude);
+    for (localAd of localAdListResult) {
+        const localAdImgResult = await articleDao.selectArticleImg(connection, article.idx);
+        const img = localAdImgResult[0];
+        localAd.representativeImg = img;
+    }
     connection.release();
 
     return localAdListResult;
