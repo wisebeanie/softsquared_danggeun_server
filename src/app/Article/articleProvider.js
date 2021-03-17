@@ -10,3 +10,19 @@ exports.categoryImgCheck = async function(categoryIdx) {
 
     return categoryImgCheckResult[0].categoryImgUrl;
 };
+
+exports.retrieveArticleCategoryList = async function() {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const categoryListResult = await articleDao.selectArticleCategory(connection);
+    connection.release();
+
+    return categoryListResult;
+}
+
+exports.retrieveLocalAdCategoryList = async function() {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const categoryListResult = await articleDao.selectLocalAdCategory(connection);
+    connection.release();
+
+    return categoryListResult;
+}

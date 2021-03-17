@@ -41,11 +41,38 @@ async function selectCategoryImg (connection, categoryIdx) {
     const selectCategoryImgRow = await connection.query(selectCategoryImgQuery, categoryIdx);
 
     return selectCategoryImgRow[0];
-}
+};
+
+// 판매글 카테고리 조회
+async function selectArticleCategory (connection) {
+    const selectArticleCategoryQuery = `
+                SELECT category
+                FROM ArticleCategory
+                WHERE idx > 0 and idx < 16;    
+                `;
+    const [selectArticleCategoryRows] = await connection.query(selectArticleCategoryQuery);
+
+    return selectArticleCategoryRows;
+};
+
+// 지역광고 카테고리 조회
+async function selectLocalAdCategory (connection) {
+    const selectLocalAdCategoryQuery = `
+                SELECT category
+                FROM ArticleCategory
+                WHERE idx > 15 and idx < 23;    
+                `;
+    const [selectLocalAdCategoryRows] = await connection.query(selectLocalAdCategoryQuery);
+
+    return selectLocalAdCategoryRows;
+};
+
 
 module.exports = {
     insertArticle,
     insertArticleImg,
     insertLocalAd,
-    selectCategoryImg
+    selectCategoryImg,
+    selectArticleCategory,
+    selectLocalAdCategory
 };

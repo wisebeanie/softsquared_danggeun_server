@@ -94,3 +94,25 @@ exports.postLocalAds = async function(req, res) {
 
     res.send(signUpResponse);
 };
+
+/*
+    API No. 11
+    API Name : 카테고리 조회 API
+    [GET] /app/articles/categories
+*/
+exports.getCategories = async function(req, res) {
+    // QueryString : isAd
+    const isAd = req.query.isAd;
+
+    if (!isAd) {
+        return res.send(response(baseResponse.ARTICLE_ISAD_EMPTY));
+    }
+
+    if (isAd == "N") {
+        const categoryListResult = await articleProvider.retrieveArticleCategoryList();
+        return res.send(response(baseResponse.SUCCESS, categoryListResult));
+    } else {
+        const categoryListResult = await articleProvider.retrieveLocalAdCategoryList();
+        return res.send(response(baseResponse.SUCCESS, categoryListResult));
+    }
+}
