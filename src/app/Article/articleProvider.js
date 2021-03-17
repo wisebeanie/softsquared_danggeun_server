@@ -34,3 +34,11 @@ exports.retrieveArticleList = async function() {
 
     return articleListResult;
 };
+
+exports.retrieveLocalAdList = async function() {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const localAdListResult = await articleDao.selectLocalAd(connection);
+    connection.release();
+
+    return localAdListResult;
+}

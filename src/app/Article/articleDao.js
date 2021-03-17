@@ -71,7 +71,7 @@ async function selectArticle (connection) {
     const selectArticleQuery = `
                 SELECT title,
                     case when price = 0
-                            then '무료나눔'
+                        then '무료나눔'
                         else price
                     end as price,
                     town,
@@ -91,16 +91,73 @@ async function selectArticle (connection) {
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
                         else concat(timestampdiff(month, Article.updatedAt, current_timestamp), '개월 전')
                         end as updateAt,
-                    articleImgUrl as 'Representative Img'
+                    articleImgUrl,
+                    case when liked is null
+                        then 0
+                        else liked
+                        end as likeCount,
+                    case when chat is null
+                        then 0
+                        else chat
+                        end as chatCount
                 FROM Article
-                    join User on userIdx = User.idx
-                    join ArticleImg on articleIdx = Article.idx
+                    left join User on Article.userIdx = User.idx
+                    left join ArticleImg on ArticleImg.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
                 WHERE isAd = 'N' and Article.status = 'Sale'
                 group by Article.idx;
                 `;
     const [selectArticleRows] = await connection.query(selectArticleQuery);
 
     return selectArticleRows;
+};
+
+async function selectLocalAd (connection) {
+    const selectLocalAdQuery = `
+                SELECT title,
+                    price,
+                    case
+                        when pullUpStatus = 'N'
+                            then 'N'
+                        else '끌올'
+                        end as pullUpStatus,
+                    case
+                        when timestampdiff(second, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(second, Article.updatedAt, current_timestamp), '초 전')
+                        when timestampdiff(minute, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
+                        when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
+                            then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
+                        else concat(timestampdiff(month, Article.updatedAt, current_timestamp), '개월 전')
+                        end as updateAt,
+                    articleImgUrl,
+                    case when liked is null
+                        then 0
+                        else liked
+                        end as likeCount,
+                    case when chat is null
+                        then 0
+                        else chat
+                        end as chatCount,
+                    case when comments is null
+                        then 0
+                        else comments
+                        end as commentCount
+                FROM Article
+                    left join User on Article.userIdx = User.idx
+                    left join ArticleImg on ArticleImg.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                WHERE isAd = 'Y' and Article.status = 'Sale'
+                group by Article.idx;
+                `;
+    const [localAdListRows] = await connection.query(selectLocalAdQuery);
+
+    return localAdListRows;
 };
 
 module.exports = {
@@ -110,5 +167,6 @@ module.exports = {
     selectCategoryImg,
     selectArticleCategory,
     selectLocalAdCategory,
-    selectArticle
+    selectArticle,
+    selectLocalAd
 };

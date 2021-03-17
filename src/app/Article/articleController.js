@@ -118,16 +118,27 @@ exports.getCategories = async function(req, res) {
 }
 
 /*
-    API No. 11
-    API Name : 판매 글 전체 조회
-    [GET] /app/articles/:userIdx
+    API No. 12
+    API Name : 글 전체 조회 글 종류에 따라
+    [GET] /app/articles/{userIdx}?isAd=
 */
 // 추후 거리별 조회를 위해 userIdx 추가
 exports.getArticles = async function(req, res) {
     // Path Variable = userIdx
     // const userIdx = req.params.userIdx;
 
-    const articleListResult = await articleProvider.retrieveArticleList();
+    // Query String = isAd
+    const isAd = req.query.isAd;
 
-    return res.send(response(baseResponse.SUCCESS, articleListResult));
-}
+    if (!isAd) {
+        return res.send(response(baseResponse.ARTICLE_ISAD_EMPTY));
+    }
+
+    if (isAd == "N") {
+        const articleListResult = await articleProvider.retrieveArticleList();
+        return res.send(response(baseResponse.SUCCESS, articleListResult));
+    } else {
+        const localAdListResult = await articleProvider.retrieveLocalAdList();
+        return res.send(response(baseResponse.SUCCESS, localAdListResult));
+    }
+};

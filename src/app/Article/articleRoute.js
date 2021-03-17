@@ -11,6 +11,6 @@ module.exports = function(app) {
     // 11. 카테고리 조회 API
     app.get('/app/articles/categories', article.getCategories);
     
-    // 12. 판매글 전체 조회 API
+    // 12. 글 전체 조회 API (글 종류에 따라)
     app.get('/app/articles', article.getArticles);
 }
