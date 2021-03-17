@@ -67,6 +67,41 @@ async function selectLocalAdCategory (connection) {
     return selectLocalAdCategoryRows;
 };
 
+async function selectArticle (connection) {
+    const selectArticleQuery = `
+                SELECT title,
+                    case when price = 0
+                            then '무료나눔'
+                        else price
+                    end as price,
+                    town,
+                    case
+                        when pullUpStatus = 'N'
+                            then 'N'
+                        else '끌올'
+                        end as pullUpStatus,
+                    case
+                        when timestampdiff(second, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(second, Article.updatedAt, current_timestamp), '초 전')
+                        when timestampdiff(minute, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
+                        when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
+                            then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
+                        else concat(timestampdiff(month, Article.updatedAt, current_timestamp), '개월 전')
+                        end as updateAt,
+                    articleImgUrl as 'Representative Img'
+                FROM Article
+                    join User on userIdx = User.idx
+                    join ArticleImg on articleIdx = Article.idx
+                WHERE isAd = 'N' and Article.status = 'Sale'
+                group by Article.idx;
+                `;
+    const [selectArticleRows] = await connection.query(selectArticleQuery);
+
+    return selectArticleRows;
+};
 
 module.exports = {
     insertArticle,
@@ -74,5 +109,6 @@ module.exports = {
     insertLocalAd,
     selectCategoryImg,
     selectArticleCategory,
-    selectLocalAdCategory
+    selectLocalAdCategory,
+    selectArticle
 };

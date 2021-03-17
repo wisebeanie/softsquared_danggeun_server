@@ -17,7 +17,7 @@ exports.retrieveArticleCategoryList = async function() {
     connection.release();
 
     return categoryListResult;
-}
+};
 
 exports.retrieveLocalAdCategoryList = async function() {
     const connection = await pool.getConnection(async (conn) => conn);
@@ -25,4 +25,12 @@ exports.retrieveLocalAdCategoryList = async function() {
     connection.release();
 
     return categoryListResult;
-}
+};
+
+exports.retrieveArticleList = async function() {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const articleListResult = await articleDao.selectArticle(connection);
+    connection.release();
+
+    return articleListResult;
+};

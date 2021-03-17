@@ -116,3 +116,18 @@ exports.getCategories = async function(req, res) {
         return res.send(response(baseResponse.SUCCESS, categoryListResult));
     }
 }
+
+/*
+    API No. 11
+    API Name : 판매 글 전체 조회
+    [GET] /app/articles/:userIdx
+*/
+// 추후 거리별 조회를 위해 userIdx 추가
+exports.getArticles = async function(req, res) {
+    // Path Variable = userIdx
+    // const userIdx = req.params.userIdx;
+
+    const articleListResult = await articleProvider.retrieveArticleList();
+
+    return res.send(response(baseResponse.SUCCESS, articleListResult));
+}
