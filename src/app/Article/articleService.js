@@ -18,19 +18,18 @@ exports.createArticle = async function (userIdx, title, description, articleImgU
         // 해당 판매글 이미지 생성
         if (articleImgUrl != "DEFAULT") {
             for (img of articleImgUrl) {
-                const insertArticleImgParams = [articleIdx, img]
+                const insertArticleImgParams = [articleIdx, img];
                 const articleImgResult = await articleDao.insertArticleImg(connection, insertArticleImgParams);
             }
         } else {
-            const insertArticleImgParams = [articleIdx, articleImgUrl]
+            const insertArticleImgParams = [articleIdx, articleImgUrl];
             const articleImgResult = await articleDao.insertArticleImg(connection, insertArticleImgParams);
         }
-    
-    
+        
         await connection.commit();
         connection.release();
 
-        return response(baseResponse.SUCCESS, {"added Article": articleIdxResult[0].insertId});
+        return response(baseResponse.SUCCESS, {"added Article": articleIdx});
     } catch(err) {
         logger.error(`App - createArticle Service Error\n: ${err.message}`);
         await connection.rollback();
@@ -38,3 +37,35 @@ exports.createArticle = async function (userIdx, title, description, articleImgU
         return errResponse(baseResponse.DB_ERROR);
     }
 };
+
+exports.createLocalAd = async function (userIdx, title, description, articleImgUrl, price, categoryIdx, noChat, isAd) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+        const insertLocalAdParmas = [userIdx, title, description, price, categoryIdx, noChat, isAd];
+        await connection.beginTransaction();
+        // 지역광고 생성
+        const localAdIdxResult = await articleDao.insertLocalAd(connection, insertLocalAdParmas);
+        
+        const localAdIdx = localAdIdxResult[0].insertId;
+        // 해당 판매글 이미지 생성
+        if (articleImgUrl != "DEFAULT") {
+            for (img of articleImgUrl) {
+                const insertLocalAdImgParams = [localAdIdx, img];
+                const localAdImgResult = await articleDao.insertArticleImg(connection, insertLocalAdImgParams);
+            }
+        } else {
+            const insertLocalAdImgParams = [localAdIdx, articleImgUrl];
+            const localAdImgResult = await articleDao.insertArticleImg(connection, insertLocalAdImgParams);
+        }
+        
+        await connection.commit();
+        connection.release();
+
+        return response(baseResponse.SUCCESS, {"added localAd": localAdIdx});
+    } catch(err) {
+        logger.error(`App - createArticle Service Error\n: ${err.message}`);
+        await connection.rollback();
+        connection.release();
+        return errResponse(baseResponse.DB_ERROR);
+    }
+}

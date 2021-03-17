@@ -20,7 +20,19 @@ async function insertArticleImg(connection, insertArticleImgParams) {
     return insertArticleImgRow;
 };
 
+// 지역 광고글 생성
+async function insertLocalAd (connection, insertLocalAdParmas) {
+    const insertLocalAdQuery = `
+                INSERT INTO Article(userIdx, title, description, price, categoryIdx, noChat, isAd)
+                VALUES (?, ?, ?, ?, ?, ?, ?);
+                `;
+    const insertLocalAdRow = await connection.query(insertLocalAdQuery, insertLocalAdParmas);
+
+    return insertLocalAdRow;
+};
+
 module.exports = {
     insertArticle,
-    insertArticleImg
+    insertArticleImg,
+    insertLocalAd
 };
