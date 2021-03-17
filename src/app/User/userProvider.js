@@ -43,3 +43,19 @@ exports.nickNameCheck = async function (nickName) {
 
     return nickNameResult;
 }
+
+exports.retrieveLatitude = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const latitudeResult = await userDao.selectLatitude(connection, userIdx);
+    connection.release();
+
+    return latitudeResult[0];
+}
+
+exports.retrieveLongitude = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const longitudeResult = await userDao.selectLongitude(connection, userIdx);
+    connection.release();
+
+    return longitudeResult[0];
+}

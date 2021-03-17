@@ -4,6 +4,8 @@ const articleService = require('./articleService');
 const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
 
+const userProvider = require("../User/userProvider");
+
 /*
     API No. 8
     판매 글 생성 API
@@ -120,25 +122,34 @@ exports.getCategories = async function(req, res) {
 /*
     API No. 12
     API Name : 글 전체 조회 글 종류에 따라
-    [GET] /app/articles/{userIdx}?isAd=
+    [GET] /app/articles?isAd=&userIdx=
 */
 // 추후 거리별 조회를 위해 userIdx 추가
 exports.getArticles = async function(req, res) {
-    // Path Variable = userIdx
-    // const userIdx = req.params.userIdx;
-
-    // Query String = isAd
+    // Query String = isAd, userIdx
+    const userIdx = req.query.userIdx;
     const isAd = req.query.isAd;
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    if (!userIdx) {
+        return res.send(errResponse(baseResponse.ARTICLE_USERIDX_EMPTY));
+    }
+    if (userIdx != userIdxFromJWT) {
+        return res.send(errResponse(baseResponse.USER_IDX_NOT_MATCH));
+    }
 
     if (!isAd) {
         return res.send(response(baseResponse.ARTICLE_ISAD_EMPTY));
     }
 
+    const latitude = await userProvider.retrieveLatitude(userIdx);
+    const longitude = await userProvider.retrieveLongitude(userIdx);
+
     if (isAd == "N") {
-        const articleListResult = await articleProvider.retrieveArticleList();
+        const articleListResult = await articleProvider.retrieveArticleList(latitude.latitude, longitude.longitude);
         return res.send(response(baseResponse.SUCCESS, articleListResult));
     } else {
-        const localAdListResult = await articleProvider.retrieveLocalAdList();
+        const localAdListResult = await articleProvider.retrieveLocalAdList(latitude.latitude, longitude.longitude);
         return res.send(response(baseResponse.SUCCESS, localAdListResult));
     }
 };

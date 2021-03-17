@@ -77,6 +77,27 @@ async function selectUserNickName(connection, nickName) {
     return nickNameRows;
 };
 
+async function selectLatitude(connection, userIdx) {
+    const selectLatitudeQuery = `
+                SELECT latitude
+                FROM User
+                WHERE idx = ?;
+                `;
+    const latitudeRows = await connection.query(selectLatitudeQuery, userIdx);
+
+    return latitudeRows[0];
+};
+
+async function selectLongitude(connection, userIdx) {
+    const selectLongitudeQuery = `
+                SELECT longitude
+                FROM User
+                WHERE idx = ?;
+                `;
+    const longitudeRows = await connection.query(selectLongitudeQuery, userIdx);
+
+    return longitudeRows[0];
+};
 
 module.exports = {
   selectUser,
@@ -85,5 +106,7 @@ module.exports = {
   insertUser,
   selectUserPhoneNumber,
   selectUserAccount,
-  selectUserNickName
+  selectUserNickName,
+  selectLatitude,
+  selectLongitude
 };

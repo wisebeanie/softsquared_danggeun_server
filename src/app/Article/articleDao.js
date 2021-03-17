@@ -67,14 +67,14 @@ async function selectLocalAdCategory (connection) {
     return selectLocalAdCategoryRows;
 };
 
-async function selectArticle (connection) {
+async function selectArticle (connection, latitude, longitude) {
     const selectArticleQuery = `
                 SELECT title,
                     case when price = 0
                         then '무료나눔'
                         else price
                     end as price,
-                    town,
+                    User.town,
                     case
                         when pullUpStatus = 'N'
                             then 'N'
@@ -105,15 +105,22 @@ async function selectArticle (connection) {
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
+                    join (SELECT idx,
+                        (6371*acos(cos(radians(User.latitude))*cos(radians(${latitude}))*cos(radians(${longitude})
+                        -radians(User.longitude))+sin(radians(User.latitude))*sin(radians(${latitude}))))
+                        as distance
+                    FROM User
+                    HAVING distance <= 4
+                    LIMIT 0,300) point on point.idx = Article.userIdx
                 WHERE isAd = 'N' and Article.status = 'Sale'
                 group by Article.idx;
                 `;
-    const [selectArticleRows] = await connection.query(selectArticleQuery);
+    const [selectArticleRows] = await connection.query(selectArticleQuery, latitude, longitude);
 
     return selectArticleRows;
 };
 
-async function selectLocalAd (connection) {
+async function selectLocalAd (connection, latitude, longitude) {
     const selectLocalAdQuery = `
                 SELECT title,
                     price,
@@ -152,10 +159,17 @@ async function selectLocalAd (connection) {
                     left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                    join (SELECT idx,
+                                    (6371*acos(cos(radians(User.latitude))*cos(radians(${latitude}))*cos(radians(${longitude})
+                                    -radians(User.longitude))+sin(radians(User.longitude))*sin(radians(${latitude}))))
+                                    as distance
+                                FROM User
+                                HAVING distance <= 4
+                                LIMIT 0,300) point on point.idx = Article.userIdx
                 WHERE isAd = 'Y' and Article.status = 'Sale'
                 group by Article.idx;
                 `;
-    const [localAdListRows] = await connection.query(selectLocalAdQuery);
+    const [localAdListRows] = await connection.query(selectLocalAdQuery, latitude, longitude);
 
     return localAdListRows;
 };

@@ -27,17 +27,17 @@ exports.retrieveLocalAdCategoryList = async function() {
     return categoryListResult;
 };
 
-exports.retrieveArticleList = async function() {
+exports.retrieveArticleList = async function(latitude, longitude) {
     const connection = await pool.getConnection(async (conn) => conn);
-    const articleListResult = await articleDao.selectArticle(connection);
+    const articleListResult = await articleDao.selectArticle(connection, latitude, longitude);
     connection.release();
 
     return articleListResult;
 };
 
-exports.retrieveLocalAdList = async function() {
+exports.retrieveLocalAdList = async function(latitude, longitude) {
     const connection = await pool.getConnection(async (conn) => conn);
-    const localAdListResult = await articleDao.selectLocalAd(connection);
+    const localAdListResult = await articleDao.selectLocalAd(connection, latitude, longitude);
     connection.release();
 
     return localAdListResult;
