@@ -15,13 +15,18 @@ exports.createArticle = async function (userIdx, title, description, articleImgU
         const articleIdxResult = await articleDao.insertArticle(connection, insertArticleParmas);
         
         const articleIdx = articleIdxResult[0].insertId;
+        
         // 해당 판매글 이미지 생성
-        if (articleImgUrl != "DEFAULT") {
+        if (articleImgUrl) {
+            // 이미지 입력한 경우
             for (img of articleImgUrl) {
                 const insertArticleImgParams = [articleIdx, img];
                 const articleImgResult = await articleDao.insertArticleImg(connection, insertArticleImgParams);
             }
         } else {
+            // 기본이미지
+            const categoryImgRow = await articleProvider.categoryImgCheck(categoryIdx);
+            articleImgUrl = categoryImgRow;
             const insertArticleImgParams = [articleIdx, articleImgUrl];
             const articleImgResult = await articleDao.insertArticleImg(connection, insertArticleImgParams);
         }
@@ -48,14 +53,18 @@ exports.createLocalAd = async function (userIdx, title, description, articleImgU
         
         const localAdIdx = localAdIdxResult[0].insertId;
         // 해당 판매글 이미지 생성
-        if (articleImgUrl != "DEFAULT") {
+        if (articleImgUrl) {
+            // 이미지 입력한 경우
             for (img of articleImgUrl) {
-                const insertLocalAdImgParams = [localAdIdx, img];
-                const localAdImgResult = await articleDao.insertArticleImg(connection, insertLocalAdImgParams);
+                const insertArticleImgParams = [articleIdx, img];
+                const articleImgResult = await articleDao.insertArticleImg(connection, insertArticleImgParams);
             }
         } else {
-            const insertLocalAdImgParams = [localAdIdx, articleImgUrl];
-            const localAdImgResult = await articleDao.insertArticleImg(connection, insertLocalAdImgParams);
+            // 기본이미지
+            const categoryImgRow = await articleProvider.categoryImgCheck(categoryIdx);
+            articleImgUrl = categoryImgRow;
+            const insertArticleImgParams = [articleIdx, articleImgUrl];
+            const articleImgResult = await articleDao.insertArticleImg(connection, insertArticleImgParams);
         }
         
         await connection.commit();

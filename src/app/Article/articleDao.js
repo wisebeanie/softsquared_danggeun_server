@@ -31,8 +31,21 @@ async function insertLocalAd (connection, insertLocalAdParmas) {
     return insertLocalAdRow;
 };
 
+// 카테고리 별 기본 이미지 조회
+async function selectCategoryImg (connection, categoryIdx) {
+    const selectCategoryImgQuery = `
+                SELECT categoryImgUrl
+                FROM ArticleCategory
+                WHERE idx = ?;
+                `;
+    const selectCategoryImgRow = await connection.query(selectCategoryImgQuery, categoryIdx);
+
+    return selectCategoryImgRow[0];
+}
+
 module.exports = {
     insertArticle,
     insertArticleImg,
-    insertLocalAd
+    insertLocalAd,
+    selectCategoryImg
 };

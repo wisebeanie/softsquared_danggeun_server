@@ -1,5 +1,5 @@
 const jwtMiddleware = require("../../../config/jwtMiddleware");
-// const articleProvider = require('./articleProvider');
+const articleProvider = require('./articleProvider');
 const articleService = require('./articleService');
 const baseResponse = require("../../../config/baseResponseStatus");
 const {response, errResponse} = require("../../../config/response");
@@ -11,18 +11,24 @@ const {response, errResponse} = require("../../../config/response");
 */
 exports.postArticles = async function(req, res) {
     /*
-        Body : userIdx, title, description, articleImgUrl, price, categortyIdx, suggestPrice 
+        Body : userIdx, title, description, articleImgUrl, price, categoryIdx, suggestPrice 
     */
     var {userIdx, title, description, articleImgUrl, price, categoryIdx, suggestPrice } = req.body;
-
+  
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+    
     if (!userIdx) {
         return res.send(response(baseResponse.ARTICLE_USERIDX_EMPTY));
+    } else if (userIdx != userIdxFromJWT) {
+        res.send(errResponse(baseResponse.USER_IDX_NOT_MATCH));
     } else if (!title) {
         return res.send(response(baseResponse.ARTICLE_TITLE_EMPTY));
     } else if (!description) {
         return res.send(response(baseResponse.ARTICLE_DESCRIPTION_EMPTY));
     } else if (!categoryIdx) {
         return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_EMPTY));
+    } else if (categoryIdx < 1 || categoryIdx > 15) {
+        return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_WRONG));
     }
 
     if (title.length > 100) {
@@ -30,17 +36,6 @@ exports.postArticles = async function(req, res) {
     } else if (description.length > 200) {
         return res.send(response(baseResponse.ARTICLE_DESCRIPTION_LENGTH));
     }
-
-    const userIdxFromJWT = req.verifiedToken.userIdx;
-
-    if (userIdx != userIdxFromJWT) {
-        res.send(errResponse(baseResponse.USER_IDX_NOT_MATCH));
-    }
-
-    // 카테고리 기본이미지 가져오기 수정
-    if (!articleImgUrl) {
-        articleImgUrl = "DEFAULT";
-    } 
     if (!price) {
         price = 0;
     }
@@ -60,18 +55,24 @@ exports.postArticles = async function(req, res) {
 */
 exports.postLocalAds = async function(req, res) {
     /*
-        Body : userIdx, title, description, articleImgUrl, price, categortyIdx, noChat
+        Body : userIdx, title, description, articleImgUrl, price, categoryIdx, noChat
     */
     var {userIdx, title, description, articleImgUrl, price, categoryIdx, noChat} = req.body;
 
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
     if (!userIdx) {
         return res.send(response(baseResponse.ARTICLE_USERIDX_EMPTY));
+    } else if (userIdx != userIdxFromJWT) {
+        res.send(errResponse(baseResponse.USER_IDX_NOT_MATCH));
     } else if (!title) {
         return res.send(response(baseResponse.ARTICLE_TITLE_EMPTY));
     } else if (!description) {
         return res.send(response(baseResponse.ARTICLE_DESCRIPTION_EMPTY));
     } else if (!categoryIdx) {
         return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_EMPTY));
+    } else if (categoryIdx < 16 || categoryIdx > 22) {
+        return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_WRONG));
     }
 
     if (title.length > 100) {
@@ -80,16 +81,6 @@ exports.postLocalAds = async function(req, res) {
         return res.send(response(baseResponse.ARTICLE_DESCRIPTION_LENGTH));
     }
 
-    const userIdxFromJWT = req.verifiedToken.userIdx;
-
-    if (userIdx != userIdxFromJWT) {
-        res.send(errResponse(baseResponse.USER_IDX_NOT_MATCH));
-    }
-    
-    // 카테고리 기본이미지 가져오기 수정
-    if (!articleImgUrl) {
-        articleImgUrl = "DEFAULT";
-    } 
     if (!price) {
         price = 0;
     }

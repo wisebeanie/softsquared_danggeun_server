@@ -7,4 +7,5 @@ module.exports = function(app) {
 
     // 10. 지역 광고 글 생성 API
     app.post('/app/localads', jwtMiddleware, article.postLocalAds);
+
 }
