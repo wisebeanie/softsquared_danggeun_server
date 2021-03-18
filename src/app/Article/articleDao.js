@@ -219,21 +219,17 @@ async function selectArticleIdx(connection, articleIdx, userIdx) {
                         then 0
                     else chat
                     end as chatCount,
-                case
-                    when isAd = 'Y'
-                        then case when comments is null
-                                then 0
-                            else comments
-                            end 
-                        else isAd
-                    end as 'isAd/commentCount',
                 viewed,
                 case
                     when LikedArticle.userIdx = ${userIdx} and LikedArticle.articleIdx = Article.idx
                         then 'liked'
                     else 'no liked'
                     end as 'likedOrNot',
-                price,
+                case
+                    when price = 0
+                        then '무료나눔'
+                    else price
+                    end as price,
                 suggestPrice,
                 Article.status
                 from Article
@@ -244,12 +240,97 @@ async function selectArticleIdx(connection, articleIdx, userIdx) {
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c
                                 on c.articleIdx = Article.idx
                     left join LikedArticle on LikedArticle.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
                 where Article.idx = ${articleIdx};
                 `;
     const [articleRow] = await connection.query(selectArticleIdxQuery, articleIdx, userIdx);
 
     return articleRow;
+};
+
+async function selectLocalAdIdx(connection, articleIdx, userIdx) {
+    const selectLocalAdIdxQuery = `
+                select nickName,
+                    profileImgUrl,
+                    town,
+                    manner,
+                    title,
+                    category,
+                    case
+                        when pullUpStatus = 'N'
+                            then 'N'
+                        else '끌올'
+                        end as pullUpStatus,
+                    case
+                        when timestampdiff(second, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(second, Article.updatedAt, current_timestamp), '초 전')
+                        when timestampdiff(minute, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
+                        when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
+                            then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
+                        else concat(timestampdiff(month, Article.updatedAt, current_timestamp), '개월 전')
+                        end as updatedAt,
+                    description,
+                    case
+                        when liked is null
+                            then 0
+                        else liked
+                        end as likeCount,
+                    case
+                        when chat is null
+                            then 0
+                        else chat
+                        end as chatCount,
+                    case
+                        when comments is null
+                            then 0
+                        else comments
+                        end as commentCount,
+                    viewed,
+                    case
+                        when LikedArticle.userIdx = ${userIdx} and LikedArticle.articleIdx = Article.idx
+                            then 'liked'
+                        else 'no liked'
+                        end as 'likedOrNot',
+                    price,
+                    noChat,
+                    Article.status
+                from Article
+                    left join User on User.idx = Article.userIdx
+                    left join ArticleCategory on Article.categoryIdx = ArticleCategory.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l
+                                on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c
+                                on c.articleIdx = Article.idx
+                    left join LikedArticle on LikedArticle.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                where Article.idx = ${articleIdx};
+                `;
+    const [localAdRow] = await connection.query(selectLocalAdIdxQuery, articleIdx, userIdx);
+
+    return localAdRow;
+};
+
+async function checkIsAd(connection, articleIdx) {
+    const checkIsAdQuery = `
+                SELECT isAd
+                FROM Article
+                WHERE idx = ?;
+                `;
+    const [isAdRow] = await connection.query(checkIsAdQuery, articleIdx);
+
+    return isAdRow;
+};
+
+async function addView(connection, articleIdx) {
+    const addViewQuery = `
+                UPDATE Article SET viewed = viewed + 1
+                WHERE idx = ?
+                `;
+    const [addViewRow] = await connection.query(addViewQuery, articleIdx);
+
+    return addViewRow;
 };
 
 module.exports = {
@@ -262,5 +343,8 @@ module.exports = {
     selectArticles,
     selectLocalAds,
     selectArticleImg,
-    selectArticleIdx
+    selectArticleIdx,
+    checkIsAd,
+    selectLocalAdIdx,
+    addView
 };

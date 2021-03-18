@@ -164,17 +164,24 @@ exports.getArticleByIdx = async function (req, res) {
     // Path Variable : articleIdx, userIdx
     const articleIdx = req.params.articleIdx;
     const userIdx = req.params.userIdx;
-    console.log(userIdx);
     const userIdxFromJWT = req.verifiedToken.userIdx;
 
     if (!articleIdx) {
         return res.send(response(baseResponse.ARTICLE_ARTICLEIDX_EMPTY));
+    } else if (!userIdx) {
+        return res.send(response(baseResponse.ARTICLE_USERIDX_EMPTY));
     }
     if (userIdx != userIdxFromJWT) {
         return res.send(errResponse(baseResponse.USER_IDX_NOT_MATCH));
     }
 
-    const articleByIdx = await articleProvider.retrieveArticle(articleIdx, userIdx);
+    const checkIsAd = await articleProvider.checkIsAd(articleIdx);
 
-    return res.send(articleByIdx);
+    if (checkIsAd.isAd == 'N') {
+        const articleByIdx = await articleProvider.retrieveArticle(articleIdx, userIdx);
+        return res.send(articleByIdx);
+    } else {
+        const localAdByIdx = await articleProvider.retrieveLocalAd(articleIdx, userIdx);
+        return res.send(localAdByIdx);
+    }
 };

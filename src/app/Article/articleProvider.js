@@ -58,26 +58,80 @@ exports.retrieveLocalAdList = async function(latitude, longitude) {
 }
 
 exports.retrieveArticle = async function(articleIdx, userIdx) {
-    const connection = await pool.getConnection(async (conn) => conn);
-    const articleResult = await articleDao.selectArticleIdx(connection, articleIdx, userIdx);
-    const article = articleResult[0];
-    
-    // 이미지 따로 추가
-    const imgArray = [];
-    const articleImgResult = await articleDao.selectArticleImg(connection, articleIdx);
-    for (img of articleImgResult) {
-        imgArray.push(img);
-    }
-    article.imgUrls = imgArray;
-    
-    connection.release();
-    if (articleResult == undefined || articleResult == null) {
-        return response(baseResponse.ARTICLE_ARTICLE_NOT_EXIST);
-    } else if (article.status == "DELETED") {
-        return response(baseResponse.ARTICLE_ARTICLE_NOT_EXIST);
-    } else if (article.status == "HIDE") {
-        return response(baseResponse.ARTICLE_ARTICLE_CANNOT_SEE);
-    }
+    const connection = await pool.getConnection(async (conn) => conn); 
+    try {
+        await connection.beginTransaction();
+        const articleResult = await articleDao.selectArticleIdx(connection, articleIdx, userIdx);
+        const article = articleResult[0];
+        
+        // 이미지 따로 추가
+        const imgArray = [];
+        const articleImgResult = await articleDao.selectArticleImg(connection, articleIdx);
+        for (img of articleImgResult) {
+            imgArray.push(img);
+        }
+        article.imgUrls = imgArray;
 
-    return response(baseResponse.SUCCESS, article);
+        const addView = await articleDao.addView(connection, articleIdx);
+        
+        await connection.commit();
+        connection.release();
+        if (articleResult == undefined || articleResult == null) {
+            return response(baseResponse.ARTICLE_ARTICLE_NOT_EXIST);
+        } else if (article.status == "DELETED") {
+            return response(baseResponse.ARTICLE_ARTICLE_NOT_EXIST);
+        } else if (article.status == "HIDE") {
+            return response(baseResponse.ARTICLE_ARTICLE_CANNOT_SEE);
+        }
+
+        return response(baseResponse.SUCCESS, article);
+    } catch (err) {
+        logger.error(`App - retrieveArticle Error\n: ${err.message}`);
+        await connection.rollback();
+        connection.release();
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};
+
+exports.retrieveLocalAd = async function(articleIdx, userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+        await connection.beginTransaction();
+        const localAdResult = await articleDao.selectocalAdIdx(connection, articleIdx, userIdx); 
+        const localAd = localAdResult[0];
+        
+        // 이미지 따로 추가
+        const imgArray = [];
+        const localAdImgResult = await articleDao.selectArticleImg(connection, articleIdx);
+        for (img of localAdImgResult) {
+            imgArray.push(img);
+        }
+        localAd.imgUrls = imgArray;
+        
+        const addView = await articleDao.addView(connection, articleIdx);
+        await connection.commit();
+        connection.release();
+        if (localAdResult == undefined || localAdResult == null) {
+            return response(baseResponse.ARTICLE_ARTICLE_NOT_EXIST);
+        } else if (localAd.status == "DELETED") {
+            return response(baseResponse.ARTICLE_ARTICLE_NOT_EXIST);
+        } else if (localAd.status == "HIDE") {
+            return response(baseResponse.ARTICLE_ARTICLE_CANNOT_SEE);
+        }
+    
+        return response(baseResponse.SUCCESS, localAd);
+    } catch(err) {
+        logger.error(`App - retrieveLocalAd Error\n: ${err.message}`);
+        await connection.rollback();
+        connection.release();
+        return errResponse(baseResponse.DB_ERROR);
+    }
+}
+
+exports.checkIsAd = async function(articleIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const isAdResult = await articleDao.checkIsAd(connection, articleIdx);
+    connection.release();
+
+    return isAdResult[0];
 };
