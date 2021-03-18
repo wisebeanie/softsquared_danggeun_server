@@ -144,7 +144,7 @@ exports.getArticles = async function(req, res) {
     const latitude = await userProvider.retrieveLatitude(userIdx);
     const longitude = await userProvider.retrieveLongitude(userIdx);
 
-    
+
 
     if (isAd == "N") {
         const articleListResult = await articleProvider.retrieveArticleList(latitude.latitude, longitude.longitude);
@@ -153,4 +153,28 @@ exports.getArticles = async function(req, res) {
         const localAdListResult = await articleProvider.retrieveLocalAdList(latitude.latitude, longitude.longitude);
         return res.send(response(baseResponse.SUCCESS, localAdListResult));
     }
+};
+
+/*
+    API No. 13
+    API Name : 특정 글 조회 API
+    [GET] /app/articles/:articelIdx
+*/
+exports.getArticleByIdx = async function (req, res) {
+    // Path Variable : articleIdx, userIdx
+    const articleIdx = req.params.articleIdx;
+    const userIdx = req.params.userIdx;
+    console.log(userIdx);
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    if (!articleIdx) {
+        return res.send(response(baseResponse.ARTICLE_ARTICLEIDX_EMPTY));
+    }
+    if (userIdx != userIdxFromJWT) {
+        return res.send(errResponse(baseResponse.USER_IDX_NOT_MATCH));
+    }
+
+    const articleByIdx = await articleProvider.retrieveArticle(articleIdx, userIdx);
+
+    return res.send(articleByIdx);
 };

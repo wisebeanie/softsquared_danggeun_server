@@ -13,4 +13,7 @@ module.exports = function(app) {
     
     // 12. 글 전체 조회 API (글 종류에 따라)
     app.get('/app/articles',jwtMiddleware, article.getArticles);
+
+    // 13. 글 상세페이지 조회 API
+    app.get('/app/articles/:articleIdx/:userIdx', jwtMiddleware, article.getArticleByIdx);
 }

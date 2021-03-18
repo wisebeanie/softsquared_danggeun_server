@@ -56,6 +56,8 @@ module.exports = {
     ARTICLE_CATEGORYIDX_WRONG : { "isSuccess": false, "code": 2033, "message": "categoryIdx를 확인해주세요." },
     
     ARTICLE_ISAD_EMPTY : { "isSuccess": false, "code": 2034, "message": "isAd를 입력해주세요." },
+    ARTICLE_ARTICLEIDX_EMPTY : { "isSuccess": false, "code": 2035, "message": "articleIdx를 입력해주세요." },
+ 
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},
@@ -73,6 +75,8 @@ module.exports = {
     AUTH_AUTHNUMBER_NOT_EXIST : { "isSuccess": false, "code": 3010, "message": "인증번호를 받지 못했습니다." },
     AUTH_AUTHNUMBER_INCORRECT : { "isSuccess": false, "code": 3011, "message": "인증번호가 틀렸습니다." },
 
+    ARTICLE_ARTICLE_NOT_EXIST : { "isSuccess": false, "code": 3012, "message": "해당 글이 존재하지 않습니다." },
+    ARTICLE_ARTICLE_CANNOT_SEE : { "isSuccess": false, "code": 3013, "message": "해당 글은 볼 수 없습니다." },
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},

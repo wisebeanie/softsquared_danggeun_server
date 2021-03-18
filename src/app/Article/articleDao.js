@@ -67,8 +67,8 @@ async function selectLocalAdCategory (connection) {
     return selectLocalAdCategoryRows;
 };
 
-async function selectArticle (connection, latitude, longitude) {
-    const selectArticleQuery = `
+async function selectArticles (connection, latitude, longitude) {
+    const selectArticlesQuery = `
                 SELECT Article.idx,
                     title,
                     case when price = 0
@@ -112,16 +112,16 @@ async function selectArticle (connection, latitude, longitude) {
                     FROM User
                     HAVING distance <= 4
                     LIMIT 0,300) point on point.idx = Article.userIdx 
-                WHERE isAd = 'N' and Article.status = 'Sale'   
+                WHERE isAd = 'N' and Article.status = 'SALE'   
                 group by Article.idx;
                 `;
-    const [selectArticleRows] = await connection.query(selectArticleQuery, latitude, longitude);
+    const [selectArticleRows] = await connection.query(selectArticlesQuery, latitude, longitude);
 
     return selectArticleRows;
 };
 
-async function selectLocalAd (connection, latitude, longitude) {
-    const selectLocalAdQuery = `
+async function selectLocalAds (connection, latitude, longitude) {
+    const selectLocalAdsQuery = `
                 SELECT Article.idx,
                     title,
                     price,
@@ -165,10 +165,10 @@ async function selectLocalAd (connection, latitude, longitude) {
                                 FROM User
                                 HAVING distance <= 4
                                 LIMIT 0,300) point on point.idx = Article.userIdx
-                WHERE isAd = 'Y' and Article.status = 'Sale'
+                WHERE isAd = 'Y' and Article.status = 'SALE'
                 group by Article.idx;
                 `;
-    const [localAdListRows] = await connection.query(selectLocalAdQuery, latitude, longitude);
+    const [localAdListRows] = await connection.query(selectLocalAdsQuery, latitude, longitude);
 
     return localAdListRows;
 };
@@ -184,6 +184,74 @@ async function selectArticleImg(connection, articleIdx) {
     return articleImgRows;
 };
 
+async function selectArticleIdx(connection, articleIdx, userIdx) {
+    const selectArticleIdxQuery = `
+                select nickName,
+                profileImgUrl,
+                town,
+                manner,
+                title,
+                category,
+                case
+                    when pullUpStatus = 'N'
+                        then 'N'
+                    else '끌올'
+                    end as pullUpStatus,
+                case
+                    when timestampdiff(second, Article.updatedAt, current_timestamp) < 60
+                        then concat(timestampdiff(second, Article.updatedAt, current_timestamp), '초 전')
+                    when timestampdiff(minute, Article.updatedAt, current_timestamp) < 60
+                        then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
+                    when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
+                        then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
+                    when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                        then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
+                    else concat(timestampdiff(month, Article.updatedAt, current_timestamp), '개월 전')
+                    end as updatedAt,
+                description,
+                case
+                    when liked is null
+                        then 0
+                    else liked
+                    end as likeCount,
+                case
+                    when chat is null
+                        then 0
+                    else chat
+                    end as chatCount,
+                case
+                    when isAd = 'Y'
+                        then case when comments is null
+                                then 0
+                            else comments
+                            end 
+                        else isAd
+                    end as 'isAd/commentCount',
+                viewed,
+                case
+                    when LikedArticle.userIdx = ${userIdx} and LikedArticle.articleIdx = Article.idx
+                        then 'liked'
+                    else 'no liked'
+                    end as 'likedOrNot',
+                price,
+                suggestPrice,
+                Article.status
+                from Article
+                    join User on User.idx = Article.userIdx
+                    join ArticleCategory on Article.categoryIdx = ArticleCategory.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l
+                                on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c
+                                on c.articleIdx = Article.idx
+                    left join LikedArticle on LikedArticle.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                where Article.idx = ${articleIdx};
+                `;
+    const [articleRow] = await connection.query(selectArticleIdxQuery, articleIdx, userIdx);
+
+    return articleRow;
+};
+
 module.exports = {
     insertArticle,
     insertArticleImg,
@@ -191,7 +259,8 @@ module.exports = {
     selectCategoryImg,
     selectArticleCategory,
     selectLocalAdCategory,
-    selectArticle,
-    selectLocalAd,
-    selectArticleImg
+    selectArticles,
+    selectLocalAds,
+    selectArticleImg,
+    selectArticleIdx
 };
