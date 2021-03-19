@@ -60,6 +60,11 @@ module.exports = {
  
     ARTICLE_ISAD_WRONG : { "isSuccess": false, "code": 2036, "message": "userIdx가 있으면 판매글만 조회 가능합니다." },
 
+    COMMENT_ARTICLEIDX_EMPTY : { "isSuccess": false, "code": 2037, "message": "articleIdx를 입력해주세요." },
+    COMMENT_USERIDX_EMPTY : { "isSuccess": false, "code": 2038, "message": "userIdx를 입력해주세요." },
+    COMMENT_CONTENT_EMPTY : { "isSuccess": false, "code": 2039, "message": "댓글을 입력해주세요." },
+    COMMENT_CONTENT_LENGTH : { "isSuccess": false, "code": 2040, "message": "댓글의 길이는 100자 이내로 입력해주세요." },
+
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},
@@ -79,6 +84,9 @@ module.exports = {
 
     ARTICLE_ARTICLE_NOT_EXIST : { "isSuccess": false, "code": 3012, "message": "해당 글이 존재하지 않습니다." },
     ARTICLE_ARTICLE_CANNOT_SEE : { "isSuccess": false, "code": 3013, "message": "해당 글은 볼 수 없습니다." },
+
+    COMMENT_ARTICLE_IS_AD_ERROR : { "isSuccess": false, "code": 3014, "message": "댓글은 판매글에는 달 수 없습니다." },
+    COMMENT_PARENT_COMMENT_NOT_EXIST : { "isSuccess": false, "code": 3015, "message": "대댓글을 달 댓글이 존재하지 않습니다." },
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},

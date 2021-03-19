@@ -86,3 +86,33 @@ exports.addView = async function(articleIdx) {
 
     return addViewResult;
 }
+
+exports.createComment = async function(articleIdx, userIdx, parentCommentIdx, content) {
+    try {
+        const articleCheck = await articleProvider.articleIdxCheck(articleIdx);
+        if (articleCheck.length < 1) {
+            return errResponse(baseResponse.ARTICLE_ARTICLE_NOT_EXIST);
+        }
+        const isAdCheck = await articleProvider.checkIsAd(articleIdx);
+        if (isAdCheck.isAd == "N") {
+            return errResponse(baseResponse.COMMENT_ARTICLE_IS_AD_ERROR);
+        }
+        if (parentCommentIdx != 0) {
+            const parentCommentCheck = await articleProvider.checkParentComment(parentCommentIdx);
+            if (parentCommentCheck.length < 1) {
+                return errResponse(baseResponse.COMMENT_PARENT_COMMENT_NOT_EXIST);
+            }
+        }
+
+        const insertCommentParams = [articleIdx, userIdx, parentCommentIdx, content];
+        const connection = await pool.getConnection(async (conn) => conn);
+
+        const commentResult = await articleDao.insertComment(connection, insertCommentParams);
+        connection.release();
+        
+        return response(baseResponse.SUCCESS, {"added Comment": commentResult[0].insertId});
+    } catch (err) {
+        logger.error(`APP - createComment Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};

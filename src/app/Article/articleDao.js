@@ -377,7 +377,39 @@ async function selectArticleUserIdx(connection, userIdx) {
     const [articleByUserIdxRows] = await connection.query(selectArticleUserIdxQuery, userIdx);
 
     return articleByUserIdxRows;
+};
+
+async function selectArticleByArticleIdx(connection, articleIdx) {
+    const selectArticleByArticleIdxQuery = `
+                SELECT idx
+                FROM Article
+                WHERE idx = ? and status != 'DELETED';
+                `;
+    const [articleIdxRow] = await connection.query(selectArticleByArticleIdxQuery, articleIdx);
+
+    return articleIdxRow;
+};
+
+async function insertComment(connection, insertCommentParams) {
+    const insertCommentQuery = `
+                INSERT INTO Comment(articleIdx, userIdx, parentCommentIdx, content)
+                VALUES(?, ?, ?, ?);
+                `;
+    const insertCommentRow = await connection.query(insertCommentQuery, insertCommentParams);
+
+    return insertCommentRow;
 }
+
+async function selectParentComment(connection, parentCommentIdx) {
+    const selectParentCommentQuery = `
+                SELECT idx
+                FROM Comment
+                WHERE idx = ? and status != 'DELETED';
+                `;
+    const [parentCommentRow] = await connection.query(selectParentCommentQuery, parentCommentIdx);
+
+    return parentCommentRow;
+};
 
 module.exports = {
     insertArticle,
@@ -393,5 +425,8 @@ module.exports = {
     checkIsAd,
     selectLocalAdIdx,
     addView,
-    selectArticleUserIdx
+    selectArticleUserIdx,
+    selectArticleByArticleIdx,
+    selectParentComment,
+    insertComment
 };

@@ -170,8 +170,6 @@ exports.getArticleByIdx = async function (req, res) {
     const articleIdx = req.params.articleIdx;
     const userIdxFromJWT = req.verifiedToken.userIdx;
 
-    console.log(req.verifiedToken);
-
     if (!articleIdx) {
         return res.send(response(baseResponse.ARTICLE_ARTICLEIDX_EMPTY));
     } 
@@ -185,4 +183,40 @@ exports.getArticleByIdx = async function (req, res) {
         const localAdByIdx = await articleProvider.retrieveLocalAd(articleIdx, userIdxFromJWT);
         return res.send(localAdByIdx);
     }
+};
+
+/*
+    API No. 14
+    API Name : 댓글 생성 API
+    [POST] /app/articles/comments
+*/
+exports.postComments = async function (req, res) {
+    /*
+        Body : articleIdx, userIdx, parentCommentIdx, content
+    */
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+    var { articleIdx, userIdx, parentCommentIdx, content } = req.body;
+
+    if (!articleIdx) {
+        return res.send(response(baseResponse.COMMENT_ARTICLEIDX_EMPTY));
+    } else if (!userIdx) {
+        return res.send(response(baseResponse.COMMENT_USERIDX_EMPTY));
+    } else if (!content) {
+        return res.send(response(baseResponse.COMMENT_CONTENT_EMPTY));
+    }
+
+    if (userIdx != userIdxFromJWT) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
+    if (content.length > 100) {
+        return res.send(response(baseResponse.COMMENT_CONTENT_LENGTH));
+    }
+
+    if (!parentCommentIdx) {
+        parentCommentIdx = 0;
+    }
+
+    const signUpResponse = await articleService.createComment(articleIdx, userIdx, parentCommentIdx, content);
+
+    return res.send(signUpResponse);
 };

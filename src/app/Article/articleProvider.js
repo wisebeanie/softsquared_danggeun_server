@@ -151,3 +151,19 @@ exports.retrieveArticleByUserIdx = async function(userIdx) {
 
     return response(baseResponse.SUCCESS, articleResult);
 }
+
+exports.articleIdxCheck = async function(articleIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const articleIdxResult = await articleDao.selectArticleByArticleIdx(connection, articleIdx);
+    connection.release();
+
+    return articleIdxResult;
+};
+
+exports.checkParentComment = async function (parentCommentIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const parentCommentResult = await articleDao.selectParentComment(connection, parentCommentIdx);
+    connection.release();
+    
+    return parentCommentResult;
+}

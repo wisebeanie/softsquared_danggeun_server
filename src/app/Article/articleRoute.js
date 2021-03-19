@@ -16,4 +16,8 @@ module.exports = function(app) {
 
     // 13. 글 상세페이지 조회 API
     app.get('/app/articles/:articleIdx', jwtMiddleware, article.getArticleByIdx);
+
+    // 14. 댓글 생성 API
+    app.post('/app/articles/comments', jwtMiddleware, article.postComments);
+
 }

@@ -73,6 +73,5 @@ module.exports = {
   selectUserAccount,
   selectUserNickName,
   selectLatitude,
-  selectLongitude,
-  selectUserIdx
+  selectLongitude
 };
