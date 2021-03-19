@@ -65,6 +65,9 @@ module.exports = {
     COMMENT_CONTENT_EMPTY : { "isSuccess": false, "code": 2039, "message": "댓글을 입력해주세요." },
     COMMENT_CONTENT_LENGTH : { "isSuccess": false, "code": 2040, "message": "댓글의 길이는 100자 이내로 입력해주세요." },
 
+    COMMENT_STATUS_ERROR_TYPE : { "isSuccess": false, "code": 2041, "message": "status는 DELETED로만 변경가능합니다." },
+    COMMENT_NO_CHANGES : { "isSuccess": false, "code": 2042, "message": "content나 status중 하나는 입력되어야 합니다." },
+
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},
@@ -87,6 +90,10 @@ module.exports = {
 
     COMMENT_ARTICLE_IS_AD_ERROR : { "isSuccess": false, "code": 3014, "message": "댓글은 판매글에는 달 수 없습니다." },
     COMMENT_PARENT_COMMENT_NOT_EXIST : { "isSuccess": false, "code": 3015, "message": "대댓글을 달 댓글이 존재하지 않습니다." },
+    COMMENT_ARTICLE_NOT_IS_AD : { "isSuccess": false, "code": 3016, "message": "댓글은 판매글에서는 볼 수 없습니다." },
+
+    COMMENT_NOT_EXIST : { "isSuccess": false, "code": 3017, "message": "해당 댓글이 존재하지 않습니다." },
+
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},
