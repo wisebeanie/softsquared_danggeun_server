@@ -92,7 +92,7 @@ async function selectArticles (connection, latitude, longitude) {
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
                         when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
-                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전');
+                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
                         end as updateAt,
                     case when liked is null
                         then 0
@@ -143,7 +143,7 @@ async function selectLocalAds (connection, latitude, longitude) {
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
                         when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
-                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전');
+                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
                         end as updateAt,
                     case when liked is null
                         then 0
@@ -212,7 +212,7 @@ async function selectArticleIdx(connection, articleIdx, userIdx) {
                         then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
                     when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
                         then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
-                    else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전');
+                    else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
                     end as updatedAt,
                 description,
                 case
@@ -277,7 +277,7 @@ async function selectLocalAdIdx(connection, articleIdx, userIdx) {
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
                         when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
-                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전');
+                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
                         end as updatedAt,
                     description,
                     case
@@ -366,7 +366,7 @@ async function selectArticleUserIdx(connection, userIdx) {
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
                         when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
-                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전');
+                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
                         end as updateAt,
                     case when liked is null
                         then 0

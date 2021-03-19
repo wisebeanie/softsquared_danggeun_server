@@ -70,6 +70,10 @@ exports.patchComment = async function(req, res) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
     }
 
+    if (status != 'DELETED' && status != null) {
+        return res.send(response(baseResponse.COMMENT_STATUS_ERROR_TYPE));
+    }
+
     if (!content && !status) {
         return res.send(response(baseResponse.COMMENT_NO_CHANGES));
     }

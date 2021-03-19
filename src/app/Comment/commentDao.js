@@ -46,7 +46,7 @@ async function selectComments(connection, articleIdx) {
                             then concat(timestampdiff(day, Comment.updatedAt, current_timestamp), '일 전')
                         when timestampdiff(month, Comment.updatedAt, current_timestamp) < 12
                             then concat(timestampdiff(day, Comment.updatedAt, current_timestamp), '개월 전')
-                        else concat(timestampdiff(year, Comment.updatedAt, current_timestamp), '년 전');
+                        else concat(timestampdiff(year, Comment.updatedAt, current_timestamp), '년 전')
                     end as writingDate,
                     content
                 FROM Comment
@@ -87,7 +87,7 @@ async function selectNestedComments(connection, parentCommentIdx) {
                         then concat(timestampdiff(day, Comment.updatedAt, current_timestamp), '일 전')
                     when timestampdiff(month, Comment.updatedAt, current_timestamp) < 12
                         then concat(timestampdiff(day, Comment.updatedAt, current_timestamp), '개월 전')
-                    else concat(timestampdiff(year, Comment.updatedAt, current_timestamp), '년 전');
+                    else concat(timestampdiff(year, Comment.updatedAt, current_timestamp), '년 전')
                 end as writingDate,
                 content
                 FROM Comment
