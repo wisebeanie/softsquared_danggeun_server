@@ -411,6 +411,84 @@ async function selectParentComment(connection, parentCommentIdx) {
     return parentCommentRow;
 };
 
+async function selectComments(connection, articleIdx) {
+    const selectCommentsQuery = `
+                SELECT Comment.idx,
+                    case
+                        when Comment.status = 'DELETED'
+                        then '삭제된 댓글입니다.'
+                        else content
+                    end as content,
+                    profileImgUrl,
+                    nickName,
+                    case
+                        when Comment.userIdx = Article.userIdx
+                            then '작성자'
+                        else 'N'
+                        end as isWriter,
+                    town,
+                    case
+                        when timestampdiff(second, Comment.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(second, Comment.updatedAt, current_timestamp), '초 전')
+                        when timestampdiff(minute, Comment.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(minute, Comment.updatedAt, current_timestamp), '분 전')
+                        when timestampdiff(hour, Comment.updatedAt, current_timestamp) < 24
+                            then concat(timestampdiff(hour, Comment.updatedAt, current_timestamp), '시간 전')
+                        when timestampdiff(day, Comment.updatedAt, current_timestamp) < 31
+                            then concat(timestampdiff(day, Comment.updatedAt, current_timestamp), '일 전')
+                        else concat(timestampdiff(month, Comment.updatedAt, current_timestamp), '개월 전')
+                    end as writingDate,
+                    content
+                FROM Comment
+                    join User on User.idx = Comment.userIdx
+                    join Article on Article.idx = Comment.articleIdx
+                WHERE articleIdx = ? and parentCommentIdx = 0
+                ORDER BY timestampdiff(second, Comment.updatedAt, current_timestamp);
+                `;
+    const [commentsRow] = await connection.query(selectCommentsQuery, articleIdx);
+
+    return commentsRow;
+};
+
+async function selectNestedComments(connection, parentCommentIdx) {
+    const selectNestedCommentsQuery = `
+                SELECT Comment.idx,
+                case
+                    when Comment.status = 'DELETED'
+                    then '삭제된 댓글입니다.'
+                    else content
+                end as content,
+                profileImgUrl,
+                nickName,
+                case
+                    when Comment.userIdx = Article.userIdx
+                        then '작성자'
+                    else 'N'
+                    end as isWriter,
+                town,
+                case
+                    when timestampdiff(second, Comment.updatedAt, current_timestamp) < 60
+                        then concat(timestampdiff(second, Comment.updatedAt, current_timestamp), '초 전')
+                    when timestampdiff(minute, Comment.updatedAt, current_timestamp) < 60
+                        then concat(timestampdiff(minute, Comment.updatedAt, current_timestamp), '분 전')
+                    when timestampdiff(hour, Comment.updatedAt, current_timestamp) < 24
+                        then concat(timestampdiff(hour, Comment.updatedAt, current_timestamp), '시간 전')
+                    when timestampdiff(day, Comment.updatedAt, current_timestamp) < 31
+                        then concat(timestampdiff(day, Comment.updatedAt, current_timestamp), '일 전')
+                    else concat(timestampdiff(month, Comment.updatedAt, current_timestamp), '개월 전')
+                end as writingDate,
+                content
+                FROM Comment
+                    join User on User.idx = Comment.userIdx
+                    join Article on Article.idx = Comment.articleIdx
+                WHERE parentCommentIdx = ?
+                ORDER BY timestampdiff(second, Comment.updatedAt, current_timestamp);
+                `;
+    const [nestedCommentsRow] = await connection.query(selectNestedCommentsQuery, parentCommentIdx);
+
+    return nestedCommentsRow;
+};
+
 module.exports = {
     insertArticle,
     insertArticleImg,
@@ -428,5 +506,7 @@ module.exports = {
     selectArticleUserIdx,
     selectArticleByArticleIdx,
     selectParentComment,
-    insertComment
+    insertComment,
+    selectComments,
+    selectNestedComments
 };

@@ -220,3 +220,20 @@ exports.postComments = async function (req, res) {
 
     return res.send(signUpResponse);
 };
+
+/*
+    API No. 15 
+    API Name : 특정 글 댓글 조회 APi
+    [GET] /app/articles/{articleIdx}/comments
+*/
+exports.getComments = async function (req, res) {
+    // Path Variable : articleIdx
+    const articleIdx = req.params.articleIdx;
+
+    if (!articleIdx) {
+        return res.send(response(baseResponse.COMMENT_ARTICLEIDX_EMPTY));
+    }
+
+    const commentsByArticle = await articleProvider.retrieveComments(articleIdx);
+    return res.send(commentsByArticle);
+};

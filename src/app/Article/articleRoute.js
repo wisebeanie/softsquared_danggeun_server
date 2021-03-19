@@ -20,4 +20,7 @@ module.exports = function(app) {
     // 14. 댓글 생성 API
     app.post('/app/articles/comments', jwtMiddleware, article.postComments);
 
+    // 15. 특정 글 댓글 조회 API
+    app.get('/app/articles/:articleIdx/comments', article.getComments);
+
 }

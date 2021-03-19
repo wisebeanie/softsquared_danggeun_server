@@ -167,3 +167,32 @@ exports.checkParentComment = async function (parentCommentIdx) {
     
     return parentCommentResult;
 }
+
+exports.retrieveComments = async function (articleIdx) {
+    const articleCheck = await this.articleIdxCheck(articleIdx);
+    if (articleCheck.length < 1) {
+        return errResponse(baseResponse.ARTICLE_ARTICLE_NOT_EXIST);
+    }
+    const isAdCheck = await this.checkIsAd(articleIdx);
+    if (isAdCheck.isAd == "N") {
+        return errResponse(baseResponse.COMMENT_ARTICLE_IS_AD_ERROR);
+    }
+    const connection = await pool.getConnection(async (conn) => conn);
+    // 대댓글이 아닌 댓글 조회
+    const commentsResult = await articleDao.selectComments(connection, articleIdx);
+    for (comment of commentsResult) {
+        // 대댓글 조회
+        const nestedCommentsResult = await articleDao.selectNestedComments(connection, comment.idx);
+        // 대댓글이 있는 경우에만
+        if (nestedCommentsResult.length > 0) {
+            var nestedComments = [];
+            for (nestedComment of nestedCommentsResult) {
+                nestedComments.push(nestedComment);
+            }
+            comment.nestedComments = nestedComments;
+        } 
+    }
+    connection.release();
+
+    return response(baseResponse.SUCCESS, commentsResult)
+}
