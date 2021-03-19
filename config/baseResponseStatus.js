@@ -67,6 +67,7 @@ module.exports = {
 
     COMMENT_STATUS_ERROR_TYPE : { "isSuccess": false, "code": 2041, "message": "status는 DELETED로만 변경가능합니다." },
     COMMENT_NO_CHANGES : { "isSuccess": false, "code": 2042, "message": "content나 status중 하나는 입력되어야 합니다." },
+    COMMENT_COMMENTIDX_EMPTY : { "isSuccess": false, "code": 2043, "message": "commentIdx를 입력해주세요." },
 
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },

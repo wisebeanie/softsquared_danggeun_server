@@ -5,6 +5,6 @@ module.exports = function(app) {
     // 14. 댓글 생성 API
     app.post('/app/comments', jwtMiddleware, comment.postComments);
 
-    // 15. 특정 댓글 수정 API
+    // 16. 특정 댓글 수정 API
     app.patch('/app/comments/:commentIdx', jwtMiddleware, comment.patchComment);
 }

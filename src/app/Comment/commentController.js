@@ -55,6 +55,10 @@ exports.patchComment = async function(req, res) {
     const userIdxFromJWT = req.verifiedToken.userIdx;
     var { content, status } = req.body;
 
+    if (!commentIdx) {
+        return res.send(response(baseResponse.COMMENT_COMMENTIDX_EMPTY));
+    }
+
     const commentByIdx = await commentProvider.retrieveCommentByIdx(commentIdx);
     if (commentByIdx.isSuccess == false) {
         return res.send(commentByIdx);
