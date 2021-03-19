@@ -11,23 +11,6 @@ exports.phoneNumberCheck = async function (phoneNumber) {
     return phoneNumberCheckResult;
 };
 
-exports.emailCheck = async function (email) {
-    const connection = await pool.getConnection(async (conn) => conn);
-    const emailCheckResult = await userDao.selectUserEmail(connection, email);
-    connection.release();
-
-    return emailCheckResult;
-};
-
-exports.retrieveUser = async function (userId) {
-    const connection = await pool.getConnection(async (conn) => conn);
-    const userResult = await userDao.selectUserId(connection, userId);
-
-    connection.release();
-
-    return userResult[0];
-};
-
 exports.accountCheck = async function (phoneNumber) {
     const connection = await pool.getConnection(async (conn) => conn);
     const userAccountResult = await userDao.selectUserAccount(connection, phoneNumber)
@@ -42,7 +25,7 @@ exports.nickNameCheck = async function (nickName) {
     connection.release();
 
     return nickNameResult;
-}
+};
 
 exports.retrieveLatitude = async function(userIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
@@ -50,7 +33,7 @@ exports.retrieveLatitude = async function(userIdx) {
     connection.release();
 
     return latitudeResult[0];
-}
+};
 
 exports.retrieveLongitude = async function(userIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
@@ -58,4 +41,4 @@ exports.retrieveLongitude = async function(userIdx) {
     connection.release();
 
     return longitudeResult[0];
-}
+};

@@ -121,67 +121,68 @@ exports.getCategories = async function(req, res) {
 
 /*
     API No. 12
-    API Name : 글 전체 조회 글 종류에 따라
-    [GET] /app/articles?isAd=&userIdx=
+    API Name : 글 전체 조회 글 종류에 따라, 유저에 따라
+    [GET] /app/articles?isAd=&userIdx
 */
 exports.getArticles = async function(req, res) {
-    // Query String = isAd, userIdx
-    const userIdx = req.query.userIdx;
-    const isAd = req.query.isAd;
+    // Query String = isAd
+    var isAd = req.query.isAd;
+    // 현재 로그인 된 유저
     const userIdxFromJWT = req.verifiedToken.userIdx;
 
-    if (!userIdx) {
-        return res.send(errResponse(baseResponse.ARTICLE_USERIDX_EMPTY));
-    }
-    if (userIdx != userIdxFromJWT) {
-        return res.send(errResponse(baseResponse.USER_IDX_NOT_MATCH));
-    }
+    // 조회하고 싶은 유저
+    const userIdx = req.query.userIdx;
 
     if (!isAd) {
-        return res.send(response(baseResponse.ARTICLE_ISAD_EMPTY));
+        isAd = "N";
     }
 
-    const latitude = await userProvider.retrieveLatitude(userIdx);
-    const longitude = await userProvider.retrieveLongitude(userIdx);
+    const latitude = await userProvider.retrieveLatitude(userIdxFromJWT);
+    const longitude = await userProvider.retrieveLongitude(userIdxFromJWT);
 
-
-
-    if (isAd == "N") {
-        const articleListResult = await articleProvider.retrieveArticleList(latitude.latitude, longitude.longitude);
-        return res.send(response(baseResponse.SUCCESS, articleListResult));
+    // 글 전체 조회
+    if (!userIdx) {
+        if (isAd == "N") {
+            const articleListResult = await articleProvider.retrieveArticleList(latitude.latitude, longitude.longitude);
+            return res.send(response(baseResponse.SUCCESS, articleListResult));
+        } else {
+            const localAdListResult = await articleProvider.retrieveLocalAdList(latitude.latitude, longitude.longitude);
+            return res.send(response(baseResponse.SUCCESS, localAdListResult));
+        }   
     } else {
-        const localAdListResult = await articleProvider.retrieveLocalAdList(latitude.latitude, longitude.longitude);
-        return res.send(response(baseResponse.SUCCESS, localAdListResult));
+        // userIdx 가 올린 글 조회
+        if (isAd == "Y") {
+            return res.send(response(baseResponse.ARTICLE_ISAD_WRONG));
+        } else {
+            const articleByUserIdx = await articleProvider.retrieveArticleByUserIdx(userIdx);
+            return res.send(articleByUserIdx);
+        }
     }
 };
 
 /*
     API No. 13
     API Name : 특정 글 조회 API
-    [GET] /app/articles/:articelIdx
+    [GET] /app/articles/{articleIdx}
 */
 exports.getArticleByIdx = async function (req, res) {
-    // Path Variable : articleIdx, userIdx
+    // Path Variable : articleIdx
     const articleIdx = req.params.articleIdx;
-    const userIdx = req.params.userIdx;
     const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    console.log(req.verifiedToken);
 
     if (!articleIdx) {
         return res.send(response(baseResponse.ARTICLE_ARTICLEIDX_EMPTY));
-    } else if (!userIdx) {
-        return res.send(response(baseResponse.ARTICLE_USERIDX_EMPTY));
-    }
-    if (userIdx != userIdxFromJWT) {
-        return res.send(errResponse(baseResponse.USER_IDX_NOT_MATCH));
-    }
+    } 
 
     const checkIsAd = await articleProvider.checkIsAd(articleIdx);
 
     if (checkIsAd.isAd == 'N') {
-        const articleByIdx = await articleProvider.retrieveArticle(articleIdx, userIdx);
+        const articleByIdx = await articleProvider.retrieveArticle(articleIdx, userIdxFromJWT);
         return res.send(articleByIdx);
     } else {
-        const localAdByIdx = await articleProvider.retrieveLocalAd(articleIdx, userIdx);
+        const localAdByIdx = await articleProvider.retrieveLocalAd(articleIdx, userIdxFromJWT);
         return res.send(localAdByIdx);
     }
 };

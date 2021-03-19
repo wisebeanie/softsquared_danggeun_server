@@ -333,6 +333,52 @@ async function addView(connection, articleIdx) {
     return addViewRow;
 };
 
+async function selectArticleUserIdx(connection, userIdx) {
+    const selectArticleUserIdxQuery = `
+                SELECT Article.idx,
+                    title,
+                    case when price = 0
+                        then '무료나눔'
+                        else price
+                    end as price,
+                    User.town,
+                    case
+                        when pullUpStatus = 'N'
+                            then 'N'
+                        else '끌올'
+                        end as pullUpStatus,
+                    case
+                        when timestampdiff(second, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(second, Article.updatedAt, current_timestamp), '초 전')
+                        when timestampdiff(minute, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
+                        when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
+                            then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
+                        else concat(timestampdiff(month, Article.updatedAt, current_timestamp), '개월 전')
+                        end as updateAt,
+                    case when liked is null
+                        then 0
+                        else liked
+                        end as likeCount,
+                    case when chat is null
+                        then 0
+                        else chat
+                        end as chatCount
+                    FROM Article
+                        left join User on Article.userIdx = User.idx
+                        left join ArticleImg on ArticleImg.articleIdx = Article.idx
+                        left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                        left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
+                    WHERE isAd = 'N' and Article.status = 'SALE' and Article.userIdx = ?
+                    group by Article.idx;
+                    `;
+    const [articleByUserIdxRows] = await connection.query(selectArticleUserIdxQuery, userIdx);
+
+    return articleByUserIdxRows;
+}
+
 module.exports = {
     insertArticle,
     insertArticleImg,
@@ -346,5 +392,6 @@ module.exports = {
     selectArticleIdx,
     checkIsAd,
     selectLocalAdIdx,
-    addView
+    addView,
+    selectArticleUserIdx
 };

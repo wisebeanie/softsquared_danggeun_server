@@ -4,6 +4,7 @@ const { logger } = require("../../../config/winston");
 const baseResponse = require("../../../config/baseResponseStatus");
 
 const articleDao = require("./articleDao");
+const articleService = require("./articleService");
 
 exports.categoryImgCheck = async function(categoryIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
@@ -72,7 +73,7 @@ exports.retrieveArticle = async function(articleIdx, userIdx) {
         }
         article.imgUrls = imgArray;
 
-        const addView = await articleDao.addView(connection, articleIdx);
+        const addView = articleService.addView(articleIdx);
         
         await connection.commit();
         connection.release();
@@ -108,7 +109,8 @@ exports.retrieveLocalAd = async function(articleIdx, userIdx) {
         }
         localAd.imgUrls = imgArray;
         
-        const addView = await articleDao.addView(connection, articleIdx);
+        const addView = articleService.addView(articleIdx);
+
         await connection.commit();
         connection.release();
         if (localAdResult == undefined || localAdResult == null) {
@@ -135,3 +137,17 @@ exports.checkIsAd = async function(articleIdx) {
 
     return isAdResult[0];
 };
+
+exports.retrieveArticleByUserIdx = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const articleResult = await articleDao.selectArticleUserIdx(connection, userIdx);
+    for (article of articleResult) {
+        const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
+        const img = articleImgResult[0];
+        article.representativeImg = img;
+    }
+    
+    connection.release();
+
+    return response(baseResponse.SUCCESS, articleResult);
+}

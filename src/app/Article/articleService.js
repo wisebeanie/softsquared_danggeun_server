@@ -78,3 +78,11 @@ exports.createLocalAd = async function (userIdx, title, description, articleImgU
         return errResponse(baseResponse.DB_ERROR);
     }
 }
+
+exports.addView = async function(articleIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const addViewResult = await articleDao.addView(connection, articleIdx);
+    connection.release();
+
+    return addViewResult;
+}

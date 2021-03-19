@@ -58,6 +58,8 @@ module.exports = {
     ARTICLE_ISAD_EMPTY : { "isSuccess": false, "code": 2034, "message": "isAd를 입력해주세요." },
     ARTICLE_ARTICLEIDX_EMPTY : { "isSuccess": false, "code": 2035, "message": "articleIdx를 입력해주세요." },
  
+    ARTICLE_ISAD_WRONG : { "isSuccess": false, "code": 2036, "message": "userIdx가 있으면 판매글만 조회 가능합니다." },
+
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},
