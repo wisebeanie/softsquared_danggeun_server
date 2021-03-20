@@ -52,7 +52,7 @@ async function selectComments(connection, articleIdx) {
                 FROM Comment
                     join User on User.idx = Comment.userIdx
                     join Article on Article.idx = Comment.articleIdx
-                WHERE articleIdx = ? and parentCommentIdx = 0
+                WHERE articleIdx = ? and parentCommentIdx = 0 and Comment.status = 'ACTIVE'
                 ORDER BY timestampdiff(second, Comment.updatedAt, current_timestamp);
                 `;
     const [commentsRow] = await connection.query(selectCommentsQuery, articleIdx);
@@ -114,14 +114,13 @@ async function selectCommentByIdx(connection, commentIdx) {
     return commentRow;
 };
 
-async function updateComment(connection, commentIdx, content, status) {
+async function updateComment(connection, commentIdx, status) {
     const updateCommentQuery = `
                 UPDATE Comment
-                SET content = '${content}',
-                    status = '${status}'
+                SET status = '${status}'
                 WHERE idx = ${commentIdx};
                 `;
-    const updateCommentRow = await connection.query(updateCommentQuery, commentIdx, content, status);
+    const updateCommentRow = await connection.query(updateCommentQuery, commentIdx, status);
 
     return updateCommentRow[0];
 };

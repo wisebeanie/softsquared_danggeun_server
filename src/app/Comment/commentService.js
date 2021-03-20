@@ -38,16 +38,16 @@ exports.createComment = async function(articleIdx, userIdx, parentCommentIdx, co
     }
 };
 
-exports.editComment = async function(commentIdx, content, status) {
+exports.editComment = async function(commentIdx, status) {
     const connection = await pool.getConnection(async (conn) => conn);
     try {
         await connection.beginTransaction();
-        const editCommentResult = await commentDao.updateComment(connection, commentIdx, content, status);
+        const editCommentResult = await commentDao.updateComment(connection, commentIdx, status);
         const commentResult = await commentDao.selectCommentByIdx(connection, commentIdx);
         await connection.commit();
         connection.release();
 
-        return response(baseResponse.SUCCESS, {"edited content": commentResult[0].content, "edited status": commentResult[0].status});
+        return response(baseResponse.SUCCESS, {"edited status": commentResult[0].status});
     } catch (err) {
         logger.error(`App - editComment Service Error\n: ${err.message}`);
         await connection.rollback();

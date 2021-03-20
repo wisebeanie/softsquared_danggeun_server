@@ -48,12 +48,12 @@ exports.postComments = async function (req, res) {
 */
 exports.patchComment = async function(req, res) {
     /*
-        Body : content, status
+        Body : status
     */
     // Path Variable : commentIdx
     const commentIdx = req.params.commentIdx;
     const userIdxFromJWT = req.verifiedToken.userIdx;
-    var { content, status } = req.body;
+    var { status } = req.body;
 
     if (!commentIdx) {
         return res.send(response(baseResponse.COMMENT_COMMENTIDX_EMPTY));
@@ -73,21 +73,10 @@ exports.patchComment = async function(req, res) {
     if (status != 'DELETED' && status != null) {
         return res.send(response(baseResponse.COMMENT_STATUS_ERROR_TYPE));
     }
-
-    if (!content && !status) {
-        return res.send(response(baseResponse.COMMENT_NO_CHANGES));
-    }
-    if (!content) {
-        content = commentByIdx[0].content;
-    }
     if (!status) {
         status = commentByIdx[0].status;
     }
 
-    if (content.length > 100) {
-        return res.send(response(baseResponse.COMMENT_CONTENT_LENGTH));
-    }
-
-    const editComment = await commentService.editComment(commentIdx, content, status);
+    const editComment = await commentService.editComment(commentIdx, status);
     return res.send(editComment);
 };
