@@ -390,7 +390,7 @@ exports.authEmailCertify = function (req, res) {
 };
 
 /*
-    API No. 19
+    API No. 18
     API Name : 마이페이지 조회 API
     [GET] /app/users/{userIdx}
 */
@@ -408,4 +408,21 @@ exports.getUserByIdx = async function(req, res) {
     const userIdxResult = await userProvider.retrieveUserByIdx(userIdx);
 
     return res.send(userIdxResult);
+};
+
+/*
+    API No. 19
+    API Name : 유저 프로필 조회 API
+    [GET] /app/users/{userIdx}/profile
+*/
+exports.getUserProfile = async function(req, res) {
+    // Path Variable : userIdx
+    const userIdx = req.params.userIdx;
+    
+    if (!userIdx) {
+        return res.send(response(baseResponse.USER_USERIDX_EMPTY));
+    } 
+    const userProfileResult = await userProvider.retrieveUserProfile(userIdx);
+
+    return res.send(userProfileResult);
 };

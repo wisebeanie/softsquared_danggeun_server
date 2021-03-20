@@ -52,3 +52,15 @@ exports.retrieveUserByIdx = async function(userIdx) {
 
     return response(baseResponse.SUCCESS, userIdxResult[0]);
 };
+
+exports.retrieveUserProfile = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const userProfileResult = await userDao.selectUserProfile(connection, userIdx);
+    connection.release();
+
+    if (userProfileResult.length < 1) {
+        return response(baseResponse.USER_USER_NOT_EXIST);
+    }
+
+    return response(baseResponse.SUCCESS, userProfileResult[0]);
+}

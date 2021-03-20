@@ -81,6 +81,32 @@ async function selectUserByIdx(connection, userIdx) {
     return userIdxRow;
 };
 
+async function selectUserProfile(connection, userIdx) {
+    const selectUserProfileQuery = `
+                SELECT profileImgUrl,
+                    nickName,
+                    10000000 + User.idx as userNum,
+                    manner,
+                    town,
+                    case
+                    when isCertified = 0
+                        then '미인증'
+                    else isCertified
+                    end as 'townCertification',
+                    date_format(createdAt, '%Y년 %c월 %d일 가입') as 'createdAt',
+                    case when sellProduct is null
+                        then 0
+                        else sellProduct
+                    end as sellCount
+                FROM User
+                left join (select userIdx, Count(userIdx) as 'sellProduct' from Article where Article.status != 'DELETED' and Article.hide != 'Y' group by userIdx) s on s.userIdx = User.idx
+                WHERE User.idx = ?;
+                `;
+    const [userProfileRow] = await connection.query(selectUserProfileQuery, userIdx);
+    
+    return userProfileRow;
+};
+
 module.exports = {
   insertUser,
   selectUserPhoneNumber,
@@ -88,5 +114,6 @@ module.exports = {
   selectUserNickName,
   selectLatitude,
   selectLongitude,
-  selectUserByIdx
+  selectUserByIdx,
+  selectUserProfile
 };
