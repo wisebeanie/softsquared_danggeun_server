@@ -1,5 +1,7 @@
+const {response, errResponse} = require("../../../config/response");
 const { pool } = require("../../../config/database");
 const { logger } = require("../../../config/winston");
+const baseResponse = require("../../../config/baseResponseStatus");
 
 const userDao = require("./userDao");
 
@@ -41,4 +43,12 @@ exports.retrieveLongitude = async function(userIdx) {
     connection.release();
 
     return longitudeResult[0];
+};
+
+exports.retrieveUserByIdx = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const userIdxResult = await userDao.selectUserByIdx(connection, userIdx);
+    connection.release();
+
+    return response(baseResponse.SUCCESS, userIdxResult[0]);
 };

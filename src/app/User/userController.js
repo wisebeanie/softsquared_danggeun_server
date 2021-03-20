@@ -388,3 +388,24 @@ exports.authEmailCertify = function (req, res) {
         }
     }
 };
+
+/*
+    API No. 19
+    API Name : 마이페이지 조회 API
+    [GET] /app/users/{userIdx}
+*/
+exports.getUserByIdx = async function(req, res) {
+    // Path Variable : userIdx
+    const userIdx = req.params.userIdx;
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    if (!userIdx) {
+        return res.send(response(baseResponse.USER_USERIDX_EMPTY));
+    }
+    if (userIdx != userIdxFromJWT) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
+    const userIdxResult = await userProvider.retrieveUserByIdx(userIdx);
+
+    return res.send(userIdxResult);
+};

@@ -84,7 +84,8 @@ module.exports = {
     MODIFY_PHONENUMBER_EMPTY : { "isSuccess": false, "code": 2054, "message": "phoneNumber를 입력해주세요" },
     MODIFY_ARTICLE_WRONG : { "isSuccess": false, "code": 2055, "message": "phoneNumber와 noChat은 판매글에서 수정 불가합니다." },
     MODIFY_LOCALAD_WRONG : { "isSuccess": false, "code": 2056, "message": "suggestPrice는 판매글에서 수정 가능합니다." },
-    
+
+    USER_USERIDX_EMPTY : { "isSuccess": false, "code": 2057, "message": "userIdx를 입력해주세요." },
 
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
@@ -112,6 +113,8 @@ module.exports = {
 
     COMMENT_NOT_EXIST : { "isSuccess": false, "code": 3017, "message": "해당 댓글이 존재하지 않습니다." },
 
+    USER_USER_NOT_EXIST : { "isSuccess": false, "code": 3018, "message": "해당 유저는 존재하지 않습니다." },
+    
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},

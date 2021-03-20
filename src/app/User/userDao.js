@@ -67,11 +67,26 @@ async function selectLongitude(connection, userIdx) {
     return longitudeRows[0];
 };
 
+async function selectUserByIdx(connection, userIdx) {
+    const selectUserByIdxQuery = `
+                SELECT profileImgUrl,
+                    nickName,
+                    town,
+                10000000 + User.idx as userNum
+                FROM User
+                WHERE idx = ?;
+                `;
+    const [userIdxRow] = await connection.query(selectUserByIdxQuery, userIdx);
+
+    return userIdxRow;
+};
+
 module.exports = {
   insertUser,
   selectUserPhoneNumber,
   selectUserAccount,
   selectUserNickName,
   selectLatitude,
-  selectLongitude
+  selectLongitude,
+  selectUserByIdx
 };

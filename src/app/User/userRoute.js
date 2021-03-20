@@ -26,8 +26,6 @@ module.exports = function(app){
     // 8. 이메일 인증번호 인증 API
     app.post('/app/auth/email/certification', user.authEmailCertify);
 
-
-    // jwt를 사용하기 위해 jwtMiddleware 를 체이닝 방식으로 추가하는 예제
-    // app.get('/app/users/:userId', jwtMiddleware, user.getUserById);
-
+    // 18. 마이페이지 조회 API
+    app.get('/app/users/:userIdx', jwtMiddleware, user.getUserByIdx);
 };
