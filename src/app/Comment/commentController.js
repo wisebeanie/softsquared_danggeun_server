@@ -59,6 +59,7 @@ exports.patchComment = async function(req, res) {
         return res.send(response(baseResponse.COMMENT_COMMENTIDX_EMPTY));
     }
 
+    // 존재하는 comment인지 확인
     const commentByIdx = await commentProvider.retrieveCommentByIdx(commentIdx);
     if (commentByIdx.isSuccess == false) {
         return res.send(commentByIdx);
@@ -70,11 +71,11 @@ exports.patchComment = async function(req, res) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
     }
 
-    if (status != 'DELETED' && status != null) {
-        return res.send(response(baseResponse.COMMENT_STATUS_ERROR_TYPE));
-    }
     if (!status) {
-        status = commentByIdx[0].status;
+        return res.send(baseResponse.COMMENT_STATUS_EMPTY);
+    }
+    if (status != 'DELETED') {
+        return res.send(response(baseResponse.COMMENT_STATUS_ERROR_TYPE));
     }
 
     const editComment = await commentService.editComment(commentIdx, status);

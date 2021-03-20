@@ -70,6 +70,21 @@ module.exports = {
     COMMENT_COMMENTIDX_EMPTY : { "isSuccess": false, "code": 2043, "message": "commentIdx를 입력해주세요." },
 
     LOCALAD_PHONENUMBER_ERROR_TYPE : { "isSuccess": false, "code": 2044, "message": "전화번호는 00000000000으로 입력해주세요." },
+    COMMENT_STATUS_EMPTY : { "isSuccess": false, "code": 2045, "message": "status를 입력해주세요." },
+
+    ARTICLE_ARTICLEIDX_WRONG : { "isSuccess": false, "code": 2046, "message": "articleIdx를 확인해주세요." },
+
+    MODIFY_ARTICLEIMG_EMPTY : { "isSuccess": false, "code": 2047, "message": "articleImgUrl을 입력해주세요." },
+    MODIFY_DESCRIPTION_EMPTY : { "isSuccess": false, "code": 2048, "message": "description을 입력해주세요." },
+    MODIFY_TITLE_EMPTY : { "isSuccess": false, "code": 2049, "message": "title을 입력해주세요" },
+    MODIFY_PRICE_EMPTY : { "isSuccess": false, "code": 2050, "message": "price를 입력해주세요." },
+    MODIFY_CATEGORY_IDX_EMPTY : { "isSuccess": false, "code": 2051, "message": "categoryIdx를 입력해주세요." },
+    MODIFY_SUGGESTPRICE_EMPTY : { "isSuccess": false, "code": 2052, "message": "suggestPrice를 입력해주세요." },
+    MODIFY_NOCHAT_EMPTY : { "isSuccess": false, "code": 2053, "message": "noChat을 입력해주세요." },
+    MODIFY_PHONENUMBER_EMPTY : { "isSuccess": false, "code": 2054, "message": "phoneNumber를 입력해주세요" },
+    MODIFY_ARTICLE_WRONG : { "isSuccess": false, "code": 2055, "message": "phoneNumber와 noChat은 판매글에서 수정 불가합니다." },
+    MODIFY_LOCALAD_WRONG : { "isSuccess": false, "code": 2056, "message": "suggestPrice는 판매글에서 수정 가능합니다." },
+    
 
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },

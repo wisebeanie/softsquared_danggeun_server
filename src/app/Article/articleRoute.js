@@ -21,5 +21,5 @@ module.exports = function(app) {
     app.get('/app/articles/:articleIdx/comments', article.getComments);
 
     // 17. 글 수정 API
-    
+    app.patch('/app/articles/:articleIdx', jwtMiddleware, article.patchArticle);
 }

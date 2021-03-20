@@ -392,13 +392,54 @@ async function selectArticleUserIdx(connection, userIdx) {
 
 async function selectArticleByArticleIdx(connection, articleIdx) {
     const selectArticleByArticleIdxQuery = `
-                SELECT idx
+                SELECT idx, userIdx, isAd
                 FROM Article
                 WHERE idx = ? and status != 'DELETED';
                 `;
     const [articleIdxRow] = await connection.query(selectArticleByArticleIdxQuery, articleIdx);
 
     return articleIdxRow;
+};
+
+async function deleteImg(connection, articleIdx) {
+    const deleteImgQuery = `
+                DELETE FROM ArticleImg
+                WHERE articleIdx = ?;
+                `;
+    const [deleteImgRow] = await connection.query(deleteImgQuery, articleIdx);
+
+    return deleteImgRow;
+};
+
+async function updateArticle(connection, articleIdx, description, title, categoryIdx, price, suggestPrice) {
+    const updateArticleQuery = `
+                UPDATE Article
+                Set description = '${description}',
+                title = '${title}',
+                categoryIdx = ${categoryIdx},
+                price = ${price},
+                suggestPrice = '${suggestPrice}'
+                WHERE idx = ${articleIdx}
+                `;
+    const [editArticleRow] = await connection.query(updateArticleQuery, articleIdx, description, title, categoryIdx, price, suggestPrice);
+
+    return editArticleRow;
+};
+
+async function updateLocalAd(connection, articleIdx, articleImgUrl, description, title, categoryIdx, price, phoneNumber, noChat) {
+    const updateLocalAdQuery = `
+                UPDATE Article
+                Set description = '${description}',
+                title = '${title}',
+                categoryIdx = ${categoryIdx},
+                price = ${price},
+                phoneNumber = '${phoneNumber}',
+                noChat = '${noChat}'
+                WHERE idx = ${articleIdx}
+                `;
+    const [editArticleRow] = await connection.query(updateLocalAdQuery, articleIdx, articleImgUrl, description, title, categoryIdx, price, phoneNumber, noChat);
+
+    return editArticleRow;
 };
 
 
@@ -417,5 +458,8 @@ module.exports = {
     selectLocalAdIdx,
     addView,
     selectArticleUserIdx,
-    selectArticleByArticleIdx
+    selectArticleByArticleIdx,
+    deleteImg,
+    updateArticle,
+    updateLocalAd
 };

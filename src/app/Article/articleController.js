@@ -211,3 +211,72 @@ exports.getComments = async function (req, res) {
     const commentsByArticle = await commentProvider.retrieveComments(articleIdx);
     return res.send(commentsByArticle);
 };
+
+/*
+    API No. 17
+    API Name : 글 수정 API
+    [PATCH] /app/articles/{articleIdx}
+*/
+exports.patchArticle = async function(req, res) {
+    // Path Variable : articleIdx
+    const articleIdx = req.params.articleIdx;
+    /*
+        Body : articleImgUrl, description, title, categoryIdx, price, phoneNumber, noChat, suggetPrice
+    */
+    var {articleImgUrl, description, title, categoryIdx, price, phoneNumber, noChat, suggestPrice} = req.body;
+    
+    // 존재하는 글인지 확인
+    const checkArticleIdx = await articleProvider.articleIdxCheck(articleIdx);
+    if (checkArticleIdx.length < 1) {
+        return res.send(response(baseResponse.ARTICLE_ARTICLEIDX_WRONG));
+    }
+
+    const userIdx = checkArticleIdx[0].userIdx;
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    if (userIdx != userIdxFromJWT) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
+
+    const isAd = checkArticleIdx[0].isAd;
+
+    if (!articleImgUrl) {
+        return res.send(response(baseResponse.MODIFY_ARTICLEIMG_EMPTY));
+    } else if (!description) {
+        return res.send(response(baseResponse.MODIFY_DESCRIPTION_EMPTY));
+    } else if (!title) {
+        return res.send(response(baseResponse.MODIFY_TITLE_EMPTY));
+    } else if (!categoryIdx) {
+        return res.send(response(baseResponse.MODIFY_CATEGORY_IDX_EMPTY));
+    } else if (!price) {
+        return res.send(response(baseResponse.MODIFY_PRICE_EMPTY));
+    } else if (isAd == "N" && !suggestPrice) {
+        return res.send(response(baseResponse.MODIFY_SUGGESTPRICE_EMPTY));
+    } else if (isAd == "Y" && !noChat) {
+        return res.send(response(baseResponse.MODIFY_NOCHAT_EMPTY));
+    } else if (isAd == "Y" && !phoneNumber) {
+        return res.send(response(baseResponse.MODIFY_PHONENUMBER_EMPTY));
+    } else if (isAd == "N" && (phoneNumber || noChat)) {
+        return res.send(response(baseResponse.MODIFY_ARTICLE_WRONG));
+    } else if (isAd == "Y" && suggestPrice) {
+        return res.send(response(baseResponse.MODIFY_LOCALAD_WRONG));
+    }
+
+    if (title.length > 100) {
+        return res.send(response(baseResponse.ARTICLE_TITLE_LENGTH));
+    } else if (description.length > 200) {
+        return res.send(response(baseResponse.ARTICLE_DESCRIPTION_LENGTH));
+    }
+
+    if (!regPhoneNumber.test(phoneNumber) && phoneNumber) {
+        return res.send(response(baseResponse.LOCALAD_PHONENUMBER_ERROR_TYPE));
+    }
+
+    if (isAd == "N") {
+        const editArticle = await articleService.editArticle(articleIdx, articleImgUrl, description, title, categoryIdx, price, suggestPrice);
+        return res.send(editArticle);
+    } else {
+        const editLocalAd = await articleService.editLocalAd(articleIdx, articleImgUrl, description, title, categoryIdx, price, phoneNumber, noChat);
+        return res.send(editLocalAd);
+    }
+};

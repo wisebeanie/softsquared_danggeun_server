@@ -86,3 +86,53 @@ exports.addView = async function(articleIdx) {
 
     return addViewResult;
 }
+
+exports.editArticle = async function(articleIdx, articleImgUrl, description, title, categoryIdx, price, suggestPrice) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+        await connection.beginTransaction();
+        // 원래 이미지 삭제
+        const deleteOriginImg = await articleDao.deleteImg(connection, articleIdx);
+        // 이미지 수정
+        for (imgIdx in articleImgUrl) {
+            const insertArticleImgParams = [articleIdx, articleImgUrl[imgIdx]];
+            const editImg = await articleDao.insertArticleImg(connection, insertArticleImgParams);
+        }
+        // 글 수정
+        const editArticleResult = await articleDao.updateArticle(connection, articleIdx, description, title, categoryIdx, price, suggestPrice);
+        await connection.commit();
+        connection.release();
+
+        return response(baseResponse.SUCCESS);
+    } catch (err) {
+        logger.error(`App - editArticle Service Error\n ${err.message}`);
+        await connection.rollback();
+        connection.release();
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};
+
+exports.editLocalAd = async function(articleIdx, articleImgUrl, description, title, categoryIdx, price, phoneNumber, noChat) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+        await connection.beginTransaction();
+        // 원래 이미지 삭제
+        const deleteOriginImg = await articleDao.deleteImg(connection, articleIdx);
+        // 이미지 수정
+        for (imgIdx in articleImgUrl) {
+            const insertArticleImgParams = [articleIdx, articleImgUrl[imgIdx]];
+            const editImg = await articleDao.insertArticleImg(connection, insertArticleImgParams);
+        }
+        // 글 수정
+        const editLocalAdResult = await articleDao.updateLocalAd(connection, articleIdx, articleImgUrl, description, title, categoryIdx, price, phoneNumber, noChat);
+        await connection.commit();
+        connection.release();
+
+        return response(baseResponse.SUCCESS);
+    } catch (err) {
+        logger.error(`App - editLocalAd Service Error\n ${err.message}`);
+        await connection.rollback();
+        connection.release();
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};
