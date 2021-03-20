@@ -107,6 +107,18 @@ async function selectUserProfile(connection, userIdx) {
     return userProfileRow;
 };
 
+async function updateProfile(connection, userIdx, profileImgUrl, nickName) {
+    const updateProfile = `
+                UPDATE User
+                SET profileImgUrl = '${profileImgUrl}',
+                    nickName = '${nickName}'
+                WHERE idx = ${userIdx};
+                `;
+    const updateProfileRow = await connection.query(updateProfile, userIdx, profileImgUrl, nickName);
+
+    return updateProfileRow;
+};
+
 module.exports = {
   insertUser,
   selectUserPhoneNumber,
@@ -115,5 +127,6 @@ module.exports = {
   selectLatitude,
   selectLongitude,
   selectUserByIdx,
-  selectUserProfile
+  selectUserProfile,
+  updateProfile
 };

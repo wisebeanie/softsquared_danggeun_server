@@ -39,6 +39,7 @@ exports.createUser = async function (nickName, phoneNumber, profileImgUrl, town,
         return response(baseResponse.SUCCESS, {"added User": userIdResult[0].insertId});
     } catch (err) {
         logger.error(`App - createUser Service error\n: ${err.message}`);
+        connection.release();
         return errResponse(baseResponse.DB_ERROR);
     }
 };
@@ -75,6 +76,27 @@ exports.postSignIn = async function(phoneNumber) {
         return response(baseResponse.SUCCESS, {'userIdx': userAccountRows[0].idx, 'jwt': token});
     } catch(err) {
         logger.error(`App - postSignIn Service error\n: ${err.message}`);
+        connection.release();
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};
+
+exports.editProfile = async function(userIdx, profileImgUrl, nickName) {
+    try {
+        // 닉네임 중복 확인
+        const nickNameRows = await userProvider.nickNameCheck(nickName);
+        if (nickNameRows.length > 0) {
+            return errResponse(baseResponse.SIGNUP_REDUNDANT_NICKNAME);
+        }
+
+        const connection = await pool.getConnection(async (conn) => conn);
+        const editProfileResult = await userDao.updateProfile(connection, userIdx, profileImgUrl, nickName);
+        connection.release();
+
+        return response(baseResponse.SUCCESS);
+    } catch (err) {
+        logger.error(`App - editProfile Service error\n: ${err.message}`);
+        connection.release();
         return errResponse(baseResponse.DB_ERROR);
     }
 };

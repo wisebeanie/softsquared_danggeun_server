@@ -426,3 +426,35 @@ exports.getUserProfile = async function(req, res) {
 
     return res.send(userProfileResult);
 };
+
+/*
+    API No. 20
+    API Name : 프로필 수정 API
+    [PATCH] /app/users/{userIdx}/profile
+*/
+exports.patchUserProfile = async function(req, res) {
+    // Path Variable : userIdx
+    const userIdx = req.params.userIdx;
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    /*
+        Body : profileImgUrl, nickName
+    */
+    const { profileImgUrl, nickName } = req.body;
+
+    if (!userIdx) {
+        return res.send(response(baseResponse.USER_USERIDX_EMPTY));
+    }
+    if (userIdx != userIdxFromJWT) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
+
+    if (!profileImgUrl) {
+        return res.send(response(baseResponse.PROFILE_PROFILEIMG_EMPTY));
+    } else if (!nickName) {
+        return res.send(response(baseResponse.PROFILE_NICKNAME_EMPTY));
+    }
+
+    const editProfileResult = await userService.editProfile(userIdx, profileImgUrl, nickName);
+    return res.send(editProfileResult);
+};

@@ -32,4 +32,7 @@ module.exports = function(app){
     // TODO 리뷰와 매너 리뷰평가 추가하기
     // 19. 특정 유저 프로필 조회 API
     app.get('/app/users/:userIdx/profile', user.getUserProfile);
+
+    // 20. 프로필 수정 API
+    app.patch('/app/users/:userIdx/profile', jwtMiddleware, user.patchUserProfile);
 };

@@ -87,6 +87,10 @@ module.exports = {
 
     USER_USERIDX_EMPTY : { "isSuccess": false, "code": 2057, "message": "userIdx를 입력해주세요." },
 
+    PROFILE_PROFILEIMG_EMPTY : { "isSuccess": false, "code": 2058, "message": "프로필 사진을 입력해주세요." },
+    PROFILE_NICKNAME_EMPTY : { "isSuccess": false, "code": 2059, "message": "닉네임을 입력해주세요." },
+     
+
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},
@@ -114,7 +118,7 @@ module.exports = {
     COMMENT_NOT_EXIST : { "isSuccess": false, "code": 3017, "message": "해당 댓글이 존재하지 않습니다." },
 
     USER_USER_NOT_EXIST : { "isSuccess": false, "code": 3018, "message": "해당 유저는 존재하지 않습니다." },
-    
+
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},
