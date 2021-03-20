@@ -49,7 +49,7 @@ exports.retrieveLocalAdList = async function(latitude, longitude) {
     const connection = await pool.getConnection(async (conn) => conn);
     const localAdListResult = await articleDao.selectLocalAds(connection, latitude, longitude);
     for (localAd of localAdListResult) {
-        const localAdImgResult = await articleDao.selectArticleImg(connection, article.idx);
+        const localAdImgResult = await articleDao.selectArticleImg(connection, localAd.idx);
         const img = localAdImgResult[0];
         localAd.representativeImg = img;
     }

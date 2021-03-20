@@ -43,10 +43,10 @@ exports.createArticle = async function (userIdx, title, description, articleImgU
     }
 };
 
-exports.createLocalAd = async function (userIdx, title, description, articleImgUrl, price, categoryIdx, noChat, isAd) {
+exports.createLocalAd = async function (userIdx, title, description, articleImgUrl, price, categoryIdx, noChat, isAd, phoneNumber) {
     const connection = await pool.getConnection(async (conn) => conn);
     try {
-        const insertLocalAdParmas = [userIdx, title, description, price, categoryIdx, noChat, isAd];
+        const insertLocalAdParmas = [userIdx, title, description, price, categoryIdx, noChat, isAd, phoneNumber];
         await connection.beginTransaction();
         // 지역광고 생성
         const localAdIdxResult = await articleDao.insertLocalAd(connection, insertLocalAdParmas);

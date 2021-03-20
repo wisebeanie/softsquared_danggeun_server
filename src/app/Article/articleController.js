@@ -7,6 +7,8 @@ const {response, errResponse} = require("../../../config/response");
 const userProvider = require("../User/userProvider");
 const commentProvider = require("../Comment/commentProvider");
 
+var regPhoneNumber = /^\d{3}\d{3,4}\d{4}$/;
+
 /*
     API No. 8
     판매 글 생성 API
@@ -58,9 +60,9 @@ exports.postArticles = async function(req, res) {
 */
 exports.postLocalAds = async function(req, res) {
     /*
-        Body : userIdx, title, description, articleImgUrl, price, categoryIdx, noChat
+        Body : userIdx, title, description, articleImgUrl, price, categoryIdx, noChat, phoneNumber
     */
-    var {userIdx, title, description, articleImgUrl, price, categoryIdx, noChat} = req.body;
+    var {userIdx, title, description, articleImgUrl, price, categoryIdx, noChat, phoneNumber} = req.body;
 
     const userIdxFromJWT = req.verifiedToken.userIdx;
 
@@ -84,16 +86,23 @@ exports.postLocalAds = async function(req, res) {
         return res.send(response(baseResponse.ARTICLE_DESCRIPTION_LENGTH));
     }
 
+    if (!regPhoneNumber.test(phoneNumber) && phoneNumber) {
+        return res.send(response(baseResponse.LOCALAD_PHONENUMBER_ERROR_TYPE));
+    }
+
     if (!price) {
         price = 0;
     }
     if (!noChat) {
         noChat = 'N';
     }
+    if (!phoneNumber) {
+        phoneNumber = 'N';
+    }
 
     const isAd = "Y";
 
-    const signUpResponse = await articleService.createLocalAd(userIdx, title, description, articleImgUrl, price, categoryIdx, noChat, isAd);
+    const signUpResponse = await articleService.createLocalAd(userIdx, title, description, articleImgUrl, price, categoryIdx, noChat, isAd, phoneNumber);
 
     res.send(signUpResponse);
 };

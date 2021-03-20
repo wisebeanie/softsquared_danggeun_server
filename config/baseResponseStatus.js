@@ -69,6 +69,8 @@ module.exports = {
     COMMENT_NO_CHANGES : { "isSuccess": false, "code": 2042, "message": "content나 status중 하나는 입력되어야 합니다." },
     COMMENT_COMMENTIDX_EMPTY : { "isSuccess": false, "code": 2043, "message": "commentIdx를 입력해주세요." },
 
+    LOCALAD_PHONENUMBER_ERROR_TYPE : { "isSuccess": false, "code": 2044, "message": "전화번호는 00000000000으로 입력해주세요." },
+
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},

@@ -23,8 +23,8 @@ async function insertArticleImg(connection, insertArticleImgParams) {
 // 지역 광고글 생성
 async function insertLocalAd (connection, insertLocalAdParmas) {
     const insertLocalAdQuery = `
-                INSERT INTO Article(userIdx, title, description, price, categoryIdx, noChat, isAd)
-                VALUES (?, ?, ?, ?, ?, ?, ?);
+                INSERT INTO Article(userIdx, title, description, price, categoryIdx, noChat, isAd, phoneNumber)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);
                 `;
     const insertLocalAdRow = await connection.query(insertLocalAdQuery, insertLocalAdParmas);
 
@@ -156,7 +156,8 @@ async function selectLocalAds (connection, latitude, longitude) {
                     case when comments is null
                         then 0
                         else comments
-                        end as commentCount
+                        end as commentCount,
+                    Article.phoneNumber
                 FROM Article
                     left join User on Article.userIdx = User.idx
                     left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx

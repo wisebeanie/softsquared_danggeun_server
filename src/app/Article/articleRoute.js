@@ -19,4 +19,7 @@ module.exports = function(app) {
 
     // 15. 특정 글 댓글 조회 API
     app.get('/app/articles/:articleIdx/comments', article.getComments);
+
+    // 17. 글 수정 API
+    
 }
