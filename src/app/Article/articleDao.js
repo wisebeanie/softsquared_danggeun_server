@@ -442,6 +442,110 @@ async function updateLocalAd(connection, articleIdx, articleImgUrl, description,
     return editArticleRow;
 };
 
+async function selectArticleByStatus(connection, userIdx, status) {
+    const selectArticleByStatusQuery = `
+                SELECT Article.idx,
+                    title,
+                    case when price = 0
+                        then '무료나눔'
+                        else price
+                    end as price,
+                    User.town,
+                    case
+                        when pullUpStatus = 'N'
+                            then 'N'
+                        else '끌올'
+                        end as pullUpStatus,
+                    case
+                        when timestampdiff(second, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(second, Article.updatedAt, current_timestamp), '초 전')
+                        when timestampdiff(minute, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
+                        when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
+                            then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
+                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
+                        end as updateAt,
+                    case when liked is null
+                        then 0
+                        else liked
+                        end as likeCount,
+                    case when chat is null
+                        then 0
+                        else chat
+                        end as chatCount,
+                    case when Article.status = 'SOLD'
+                        then '거래완료'
+                        else Article.status
+                    end as status
+                FROM Article
+                    left join User on Article.userIdx = User.idx
+                    left join ArticleImg on ArticleImg.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
+                WHERE isAd = 'N' and Article.status = '${status}' and Article.userIdx = '${userIdx}'
+                group by Article.idx;
+                `;
+    const [articleBystatusRow] = await connection.query(selectArticleByStatusQuery, userIdx, status);
+
+    return articleBystatusRow;
+};
+
+async function selectHideArticles(connection, userIdx) {
+    const selectHideArticlesQuery = `
+                SELECT Article.idx,
+                    title,
+                    case when price = 0
+                        then '무료나눔'
+                        else price
+                    end as price,
+                    User.town,
+                    case
+                        when pullUpStatus = 'N'
+                            then 'N'
+                        else '끌올'
+                        end as pullUpStatus,
+                    case
+                        when timestampdiff(second, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(second, Article.updatedAt, current_timestamp), '초 전')
+                        when timestampdiff(minute, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
+                        when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
+                            then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
+                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
+                        end as updateAt,
+                    case when liked is null
+                        then 0
+                        else liked
+                        end as likeCount,
+                    case when chat is null
+                        then 0
+                        else chat
+                        end as chatCount,
+                    case when Article.status = 'SOLD'
+                        then '거래완료'
+                        else Article.status
+                    end as status
+                FROM Article
+                    left join User on Article.userIdx = User.idx
+                    left join ArticleImg on ArticleImg.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
+                WHERE isAd = 'N' and Article.hide = 'Y' and Article.userIdx = '${userIdx}'
+                group by Article.idx;
+                `;
+    const [hideArticleRows] = await connection.query(selectHideArticlesQuery, userIdx);
+
+    return hideArticleRows;
+};
+
 
 module.exports = {
     insertArticle,
@@ -461,5 +565,7 @@ module.exports = {
     selectArticleByArticleIdx,
     deleteImg,
     updateArticle,
-    updateLocalAd
+    updateLocalAd,
+    selectArticleByStatus,
+    selectHideArticles
 };

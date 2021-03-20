@@ -35,4 +35,7 @@ module.exports = function(app){
 
     // 20. 프로필 수정 API
     app.patch('/app/users/:userIdx/profile', jwtMiddleware, user.patchUserProfile);
+
+    // 21. 판매 내역 조회 API (판매 상태에 따라 조회)
+    app.get('/app/users/:userIdx/sales', jwtMiddleware, user.getUserSales);
 };

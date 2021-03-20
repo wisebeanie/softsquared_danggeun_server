@@ -21,6 +21,8 @@ const nodeCache = require('node-cache');
 const { type } = require("os");
 const cache = new nodeCache();
 
+const articleProvider = require("../Article/articleProvider");
+
 /**
  * API No. 1
  * API Name : 인증번호 전송 API
@@ -457,4 +459,41 @@ exports.patchUserProfile = async function(req, res) {
 
     const editProfileResult = await userService.editProfile(userIdx, profileImgUrl, nickName);
     return res.send(editProfileResult);
+};
+
+/*
+    API No. 21
+    API Name : 판매 내역 조회 API (판매 상태에 따라)
+    [GET] /app/users/{userIdx}/sales?status=
+*/
+exports.getUserSales = async function(req, res) {
+    // Path Variable : userIdx
+    const userIdx = req.params.userIdx;
+    // Query String
+    const status = req.query.status;
+
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    console.log(status);
+
+    if (!userIdx) {
+        return res.send(response(baseResponse.USER_USERIDX_EMPTY));
+    } else if (!status) {
+        return res.send(response(baseResponse.ARTICLE_STATUS_EMPTY));
+    } 
+    else if (status != 'SALE' && status != 'SOLD' && status != 'HIDE') {
+        return res.send(response(baseResponse.ARTICLE_STATUS_ERROR_TYPE));
+    }
+
+    if (status == 'HIDE' && (userIdx != userIdxFromJWT)) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
+
+    if (status == 'SALE' || status == 'SOLD') {
+        const userSalesResult = await articleProvider.retrieveSales(userIdx, status);
+        return res.send(userSalesResult);
+    } else {
+        const userSalesResult = await articleProvider.retrieveHideArticles(userIdx);
+        return res.send(userSalesResult);
+    }
 };

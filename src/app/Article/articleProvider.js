@@ -159,3 +159,19 @@ exports.articleIdxCheck = async function(articleIdx) {
 
     return articleIdxResult;
 };
+
+exports.retrieveSales = async function(userIdx, status) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const salesResult = await articleDao.selectArticleByStatus(connection, userIdx, status);
+    connection.release();
+
+    return response(baseResponse.SUCCESS, salesResult);
+};
+
+exports.retrieveHideArticles = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const articleResult = await articleDao.selectHideArticles(connection, userIdx);
+    connection.release();
+
+    return response(baseResponse.SUCCESS, articleResult);
+};

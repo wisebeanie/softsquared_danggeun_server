@@ -89,7 +89,9 @@ module.exports = {
 
     PROFILE_PROFILEIMG_EMPTY : { "isSuccess": false, "code": 2058, "message": "프로필 사진을 입력해주세요." },
     PROFILE_NICKNAME_EMPTY : { "isSuccess": false, "code": 2059, "message": "닉네임을 입력해주세요." },
-     
+    
+    ARTICLE_STATUS_ERROR_TYPE : { "isSuccess": false, "code": 2060, "message": "status는 SALE, SOLD, HIDE 중 하나로 입력해주세요." },
+    ARTICLE_STATUS_EMPTY : { "isSuccess": false, "code": 2061, "message": "status를 입력해주세요." },
 
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
