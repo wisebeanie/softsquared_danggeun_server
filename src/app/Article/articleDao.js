@@ -114,7 +114,7 @@ async function selectArticles (connection, latitude, longitude) {
                     FROM User
                     HAVING distance <= 4
                     LIMIT 0,300) point on point.idx = Article.userIdx 
-                WHERE isAd = 'N' and Article.status = 'SALE'   
+                WHERE isAd = 'N' and Article.status = 'SALE' and hide != 'Y'   
                 group by Article.idx;
                 `;
     const [selectArticleRows] = await connection.query(selectArticlesQuery, latitude, longitude);
@@ -170,7 +170,7 @@ async function selectLocalAds (connection, latitude, longitude) {
                                 FROM User
                                 HAVING distance <= 4
                                 LIMIT 0,300) point on point.idx = Article.userIdx
-                WHERE isAd = 'Y' and Article.status = 'SALE'
+                WHERE isAd = 'Y' and Article.status = 'SALE' and hide != 'Y'   
                 group by Article.idx;
                 `;
     const [localAdListRows] = await connection.query(selectLocalAdsQuery, latitude, longitude);
@@ -192,53 +192,53 @@ async function selectArticleImg(connection, articleIdx) {
 async function selectArticleIdx(connection, articleIdx, userIdx) {
     const selectArticleIdxQuery = `
                 select nickName,
-                profileImgUrl,
-                town,
-                manner,
-                title,
-                category,
-                case
-                    when pullUpStatus = 'N'
-                        then 'N'
-                    else '끌올'
-                    end as pullUpStatus,
-                case
-                    when timestampdiff(second, Article.updatedAt, current_timestamp) < 60
-                        then concat(timestampdiff(second, Article.updatedAt, current_timestamp), '초 전')
-                    when timestampdiff(minute, Article.updatedAt, current_timestamp) < 60
-                        then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
-                    when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
-                        then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
-                    when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
-                        then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
-                    when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
-                        then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
-                    else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
-                    end as updatedAt,
-                description,
-                case
-                    when liked is null
-                        then 0
-                    else liked
-                    end as likeCount,
-                case
-                    when chat is null
-                        then 0
-                    else chat
-                    end as chatCount,
-                viewed,
-                case
-                    when LikedArticle.userIdx = ${userIdx} and LikedArticle.articleIdx = Article.idx
-                        then 'liked'
-                    else 'no liked'
-                    end as 'likedOrNot',
-                case
-                    when price = 0
-                        then '무료나눔'
-                    else price
-                    end as price,
-                suggestPrice,
-                Article.status
+                    profileImgUrl,
+                    town,
+                    manner,
+                    title,
+                    category,
+                    case
+                        when pullUpStatus = 'N'
+                            then 'N'
+                        else '끌올'
+                        end as pullUpStatus,
+                    case
+                        when timestampdiff(second, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(second, Article.updatedAt, current_timestamp), '초 전')
+                        when timestampdiff(minute, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
+                        when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
+                            then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
+                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
+                        end as updatedAt,
+                    description,
+                    case
+                        when liked is null
+                            then 0
+                        else liked
+                        end as likeCount,
+                    case
+                        when chat is null
+                            then 0
+                        else chat
+                        end as chatCount,
+                    viewed,
+                    case
+                        when LikedArticle.userIdx = ${userIdx} and LikedArticle.articleIdx = Article.idx
+                            then 'liked'
+                        else 'no liked'
+                        end as 'likedOrNot',
+                    case
+                        when price = 0
+                            then '무료나눔'
+                        else price
+                        end as price,
+                    suggestPrice,
+                    Article.status
                 from Article
                     join User on User.idx = Article.userIdx
                     join ArticleCategory on Article.categoryIdx = ArticleCategory.idx
@@ -382,7 +382,7 @@ async function selectArticleUserIdx(connection, userIdx) {
                         left join ArticleImg on ArticleImg.articleIdx = Article.idx
                         left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
                         left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                    WHERE isAd = 'N' and Article.status = 'SALE' and Article.userIdx = ?
+                    WHERE isAd = 'N' and Article.status = 'SALE' and Article.userIdx = ? and and hide != 'Y'
                     group by Article.idx;
                     `;
     const [articleByUserIdxRows] = await connection.query(selectArticleUserIdxQuery, userIdx);
@@ -486,7 +486,7 @@ async function selectArticleByStatus(connection, userIdx, status) {
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                WHERE isAd = 'N' and Article.status = '${status}' and Article.userIdx = '${userIdx}'
+                WHERE isAd = 'N' and Article.status = '${status}' and Article.userIdx = '${userIdx}' and hide != 'Y'
                 group by Article.idx;
                 `;
     const [articleBystatusRow] = await connection.query(selectArticleByStatusQuery, userIdx, status);
@@ -531,8 +531,10 @@ async function selectHideArticles(connection, userIdx) {
                         end as chatCount,
                     case when Article.status = 'SOLD'
                         then '거래완료'
+                        when Article.status = "RESERVED"
+                            then '예약중'
                         else Article.status
-                    end as status
+                        end as status
                 FROM Article
                     left join User on Article.userIdx = User.idx
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
@@ -546,6 +548,59 @@ async function selectHideArticles(connection, userIdx) {
     return hideArticleRows;
 };
 
+async function selectSalesUserIdx(connection, userIdx) {
+    const selectSalesUserIdxQuery = `
+                SELECT Article.idx,
+                    title,
+                    case when price = 0
+                        then '무료나눔'
+                        else price
+                    end as price,
+                    User.town,
+                    case
+                        when pullUpStatus = 'N'
+                            then 'N'
+                        else '끌올'
+                        end as pullUpStatus,
+                    case
+                        when timestampdiff(second, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(second, Article.updatedAt, current_timestamp), '초 전')
+                        when timestampdiff(minute, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
+                        when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
+                            then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
+                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
+                        end as updateAt,
+                    case when liked is null
+                        then 0
+                        else liked
+                        end as likeCount,
+                    case when chat is null
+                        then 0
+                        else chat
+                        end as chatCount,
+                    case when Article.status = 'SOLD'
+                        then '거래완료'
+                        when Article.status = "RESERVED"
+                            then '예약중'
+                        else Article.status
+                        end as status
+                    FROM Article
+                        left join User on Article.userIdx = User.idx
+                        left join ArticleImg on ArticleImg.articleIdx = Article.idx
+                        left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                        left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
+                    WHERE isAd = 'N' and Article.userIdx = ? and hide != 'Y'
+                    group by Article.idx;
+                    `;
+    const [salesByUserIdxRows] = await connection.query(selectSalesUserIdxQuery, userIdx);
+
+    return salesByUserIdxRows;
+};
 
 module.exports = {
     insertArticle,
@@ -567,5 +622,6 @@ module.exports = {
     updateArticle,
     updateLocalAd,
     selectArticleByStatus,
-    selectHideArticles
+    selectHideArticles,
+    selectSalesUserIdx
 };

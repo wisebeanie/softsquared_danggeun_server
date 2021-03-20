@@ -474,14 +474,9 @@ exports.getUserSales = async function(req, res) {
 
     const userIdxFromJWT = req.verifiedToken.userIdx;
 
-    console.log(status);
-
     if (!userIdx) {
         return res.send(response(baseResponse.USER_USERIDX_EMPTY));
-    } else if (!status) {
-        return res.send(response(baseResponse.ARTICLE_STATUS_EMPTY));
-    } 
-    else if (status != 'SALE' && status != 'SOLD' && status != 'HIDE') {
+    } else if (status != 'SALE' && status != 'SOLD' && status != 'HIDE' && status) {
         return res.send(response(baseResponse.ARTICLE_STATUS_ERROR_TYPE));
     }
 
@@ -489,7 +484,10 @@ exports.getUserSales = async function(req, res) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
     }
 
-    if (status == 'SALE' || status == 'SOLD') {
+    if (!status) {
+        const salesByUserIdx = await articleProvider.retrieveSalesByUserIdx(userIdx);
+        return res.send(salesByUserIdx);
+    } else if (status == 'SALE' || status == 'SOLD') {
         const userSalesResult = await articleProvider.retrieveSales(userIdx, status);
         return res.send(userSalesResult);
     } else {

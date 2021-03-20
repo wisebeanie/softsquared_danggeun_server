@@ -163,6 +163,11 @@ exports.articleIdxCheck = async function(articleIdx) {
 exports.retrieveSales = async function(userIdx, status) {
     const connection = await pool.getConnection(async (conn) => conn);
     const salesResult = await articleDao.selectArticleByStatus(connection, userIdx, status);
+    for (article of salesResult) {
+        const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
+        const img = articleImgResult[0];
+        article.representativeImg = img;
+    }
     connection.release();
 
     return response(baseResponse.SUCCESS, salesResult);
@@ -171,7 +176,25 @@ exports.retrieveSales = async function(userIdx, status) {
 exports.retrieveHideArticles = async function(userIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
     const articleResult = await articleDao.selectHideArticles(connection, userIdx);
+    for (article of articleResult) {
+        const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
+        const img = articleImgResult[0];
+        article.representativeImg = img;
+    }
     connection.release();
 
     return response(baseResponse.SUCCESS, articleResult);
 };
+
+exports.retrieveSalesByUserIdx = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const articleResult = await articleDao.selectSalesUserIdx(connection, userIdx);
+    for (article of articleResult) {
+        const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
+        const img = articleImgResult[0];
+        article.representativeImg = img;
+    }
+    connection.release();
+
+    return response(baseResponse.SUCCESS, articleResult);
+}
