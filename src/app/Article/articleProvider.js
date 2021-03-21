@@ -30,11 +30,11 @@ exports.retrieveLocalAdCategoryList = async function() {
     return categoryListResult;
 };
 
-exports.retrieveArticleList = async function(latitude, longitude) {
+exports.retrieveArticleList = async function(latitude, longitude, categoryList) {
     const connection = await pool.getConnection(async (conn) => conn);
 
     // 판매 글 조회
-    const articleListResult = await articleDao.selectArticles(connection, latitude, longitude);
+    const articleListResult = await articleDao.selectArticles(connection, latitude, longitude, categoryList);
     for (article of articleListResult) {
         const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
         const img = articleImgResult[0];
@@ -45,9 +45,9 @@ exports.retrieveArticleList = async function(latitude, longitude) {
     return articleListResult;
 };
 
-exports.retrieveLocalAdList = async function(latitude, longitude) {
+exports.retrieveLocalAdList = async function(latitude, longitude, categoryList) {
     const connection = await pool.getConnection(async (conn) => conn);
-    const localAdListResult = await articleDao.selectLocalAds(connection, latitude, longitude);
+    const localAdListResult = await articleDao.selectLocalAds(connection, latitude, longitude, categoryList);
     for (localAd of localAdListResult) {
         const localAdImgResult = await articleDao.selectArticleImg(connection, localAd.idx);
         const img = localAdImgResult[0];
@@ -137,20 +137,6 @@ exports.checkIsAd = async function(articleIdx) {
 
     return isAdResult[0];
 };
-
-exports.retrieveArticleByUserIdx = async function(userIdx) {
-    const connection = await pool.getConnection(async (conn) => conn);
-    const articleResult = await articleDao.selectArticleUserIdx(connection, userIdx);
-    for (article of articleResult) {
-        const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
-        const img = articleImgResult[0];
-        article.representativeImg = img;
-    }
-    
-    connection.release();
-
-    return response(baseResponse.SUCCESS, articleResult);
-}
 
 exports.articleIdxCheck = async function(articleIdx) {
     const connection = await pool.getConnection(async (conn) => conn);

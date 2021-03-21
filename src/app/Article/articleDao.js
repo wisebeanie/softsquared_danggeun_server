@@ -67,8 +67,8 @@ async function selectLocalAdCategory (connection) {
     return selectLocalAdCategoryRows;
 };
 
-async function selectArticles (connection, latitude, longitude) {
-    const selectArticlesQuery = `
+async function selectArticles (connection, latitude, longitude, categoryList) {
+    var selectArticlesQuery = `
                 SELECT Article.idx,
                     title,
                     case when price = 0
@@ -101,7 +101,11 @@ async function selectArticles (connection, latitude, longitude) {
                     case when chat is null
                         then 0
                         else chat
-                        end as chatCount
+                        end as chatCount,
+                    case when Article.status = 'RESERVED'
+                        then '예약중'
+                        else Article.status
+                        end as status
                 FROM Article
                     left join User on Article.userIdx = User.idx
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
@@ -113,17 +117,26 @@ async function selectArticles (connection, latitude, longitude) {
                         as distance
                     FROM User
                     HAVING distance <= 4
-                    LIMIT 0,300) point on point.idx = Article.userIdx 
-                WHERE isAd = 'N' and Article.status = 'SALE' and hide != 'Y'   
-                group by Article.idx;
-                `;
-    const [selectArticleRows] = await connection.query(selectArticlesQuery, latitude, longitude);
+                    LIMIT 0,300) point on point.idx = Article.userIdx
+                WHERE isAd = 'N' and Article.status != 'DELETED' and Article.status != 'SOLD' and hide != 'Y' and (`;
+    // 카테고리 필터링
+    for (categoryListIdx in categoryList) {
+        if (categoryListIdx == categoryList.length - 1) {
+            selectArticlesQuery += `categoryIdx = ${categoryList[categoryListIdx]}`
+        }
+        else {
+            selectArticlesQuery += `categoryIdx = ${categoryList[categoryListIdx]} or `;
+        }
+    }   
+    selectArticlesQuery += `) group by Article.idx`;
+
+    const [selectArticleRows] = await connection.query(selectArticlesQuery, latitude, longitude, categoryList);
 
     return selectArticleRows;
 };
 
-async function selectLocalAds (connection, latitude, longitude) {
-    const selectLocalAdsQuery = `
+async function selectLocalAds (connection, latitude, longitude, categoryList) {
+    var selectLocalAdsQuery = `
                 SELECT Article.idx,
                     title,
                     price,
@@ -157,23 +170,35 @@ async function selectLocalAds (connection, latitude, longitude) {
                         then 0
                         else comments
                         end as commentCount,
-                    Article.phoneNumber
+                    Article.phoneNumber,
+                    case when Article.status = 'RESERVED'
+                        then '예약중'
+                        else Article.status
+                        end as status
                 FROM Article
                     left join User on Article.userIdx = User.idx
                     left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
                     join (SELECT idx,
-                                    (6371*acos(cos(radians(User.latitude))*cos(radians(${latitude}))*cos(radians(${longitude})
-                                    -radians(User.longitude))+sin(radians(User.longitude))*sin(radians(${latitude}))))
-                                    as distance
-                                FROM User
-                                HAVING distance <= 4
-                                LIMIT 0,300) point on point.idx = Article.userIdx
-                WHERE isAd = 'Y' and Article.status = 'SALE' and hide != 'Y'   
-                group by Article.idx;
-                `;
-    const [localAdListRows] = await connection.query(selectLocalAdsQuery, latitude, longitude);
+                        (6371*acos(cos(radians(User.latitude))*cos(radians(${latitude}))*cos(radians(${longitude})
+                        -radians(User.longitude))+sin(radians(User.latitude))*sin(radians(${latitude}))))
+                        as distance
+                    FROM User
+                    HAVING distance <= 4
+                    LIMIT 0,300) point on point.idx = Article.userIdx
+                WHERE isAd = 'Y' and Article.status != 'DELETED' and Article.status != 'SOLD' and hide != 'Y' and (`;
+    // 카테고리 필터링
+    for (categoryListIdx in categoryList) {
+        if (categoryListIdx == categoryList.length - 1) {
+            selectLocalAdsQuery += `categoryIdx = ${categoryList[categoryListIdx]}`
+        }
+        else {
+            selectLocalAdsQuery += `categoryIdx = ${categoryList[categoryListIdx]} or `;
+        }
+    }   
+    selectLocalAdsQuery += `) group by Article.idx`;
+    const [localAdListRows] = await connection.query(selectLocalAdsQuery, latitude, longitude, categoryList);
 
     return localAdListRows;
 };
@@ -342,54 +367,6 @@ async function addView(connection, articleIdx) {
     return addViewRow;
 };
 
-async function selectArticleUserIdx(connection, userIdx) {
-    const selectArticleUserIdxQuery = `
-                SELECT Article.idx,
-                    title,
-                    case when price = 0
-                        then '무료나눔'
-                        else price
-                    end as price,
-                    User.town,
-                    case
-                        when pullUpStatus = 'N'
-                            then 'N'
-                        else '끌올'
-                        end as pullUpStatus,
-                    case
-                        when timestampdiff(second, Article.updatedAt, current_timestamp) < 60
-                            then concat(timestampdiff(second, Article.updatedAt, current_timestamp), '초 전')
-                        when timestampdiff(minute, Article.updatedAt, current_timestamp) < 60
-                            then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
-                        when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
-                            then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
-                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
-                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
-                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
-                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
-                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
-                        end as updateAt,
-                    case when liked is null
-                        then 0
-                        else liked
-                        end as likeCount,
-                    case when chat is null
-                        then 0
-                        else chat
-                        end as chatCount
-                    FROM Article
-                        left join User on Article.userIdx = User.idx
-                        left join ArticleImg on ArticleImg.articleIdx = Article.idx
-                        left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
-                        left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                    WHERE isAd = 'N' and Article.status = 'SALE' and Article.userIdx = ? and and hide != 'Y'
-                    group by Article.idx;
-                    `;
-    const [articleByUserIdxRows] = await connection.query(selectArticleUserIdxQuery, userIdx);
-
-    return articleByUserIdxRows;
-};
-
 async function selectArticleByArticleIdx(connection, articleIdx) {
     const selectArticleByArticleIdxQuery = `
                 SELECT idx, userIdx, isAd
@@ -479,8 +456,10 @@ async function selectArticleByStatus(connection, userIdx, status) {
                         end as chatCount,
                     case when Article.status = 'SOLD'
                         then '거래완료'
+                        when Article.status = "RESERVED"
+                            then '예약중'
                         else Article.status
-                    end as status
+                        end as status
                 FROM Article
                     left join User on Article.userIdx = User.idx
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
@@ -594,7 +573,7 @@ async function selectSalesUserIdx(connection, userIdx) {
                         left join ArticleImg on ArticleImg.articleIdx = Article.idx
                         left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
                         left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                    WHERE isAd = 'N' and Article.userIdx = ? and hide != 'Y'
+                    WHERE isAd = 'N' and Article.userIdx = ? and hide != 'Y' and status != 'DELETED'
                     group by Article.idx;
                     `;
     const [salesByUserIdxRows] = await connection.query(selectSalesUserIdxQuery, userIdx);
@@ -616,7 +595,6 @@ module.exports = {
     checkIsAd,
     selectLocalAdIdx,
     addView,
-    selectArticleUserIdx,
     selectArticleByArticleIdx,
     deleteImg,
     updateArticle,

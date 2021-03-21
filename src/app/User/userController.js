@@ -485,12 +485,15 @@ exports.getUserSales = async function(req, res) {
     }
 
     if (!status) {
+        // 판매 내역 전체 조회
         const salesByUserIdx = await articleProvider.retrieveSalesByUserIdx(userIdx);
         return res.send(salesByUserIdx);
     } else if (status == 'SALE' || status == 'SOLD') {
+        // 판매중 or 판매완료 내역 조회
         const userSalesResult = await articleProvider.retrieveSales(userIdx, status);
         return res.send(userSalesResult);
     } else {
+        // 숨김 게시글 조회
         const userSalesResult = await articleProvider.retrieveHideArticles(userIdx);
         return res.send(userSalesResult);
     }

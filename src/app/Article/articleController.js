@@ -131,43 +131,34 @@ exports.getCategories = async function(req, res) {
 
 /*
     API No. 12
-    API Name : 글 전체 조회 글 종류에 따라, 유저에 따라
-    [GET] /app/articles?isAd=&userIdx
+    API Name : 글 전체 조회 글 종류에 따라
+    [GET] /app/articles?isAd=&categoryIdx=
 */
 exports.getArticles = async function(req, res) {
     // Query String = isAd
     var isAd = req.query.isAd;
+    var categoryList = req.query.categoryIdx;
+
     // 현재 로그인 된 유저
     const userIdxFromJWT = req.verifiedToken.userIdx;
-
-    // 조회하고 싶은 유저
-    const userIdx = req.query.userIdx;
 
     if (!isAd) {
         isAd = "N";
     }
 
+    // 로그인 된 유저의 위경도
     const latitude = await userProvider.retrieveLatitude(userIdxFromJWT);
     const longitude = await userProvider.retrieveLongitude(userIdxFromJWT);
 
-    // 글 전체 조회
-    if (!userIdx) {
-        if (isAd == "N") {
-            const articleListResult = await articleProvider.retrieveArticleList(latitude.latitude, longitude.longitude);
-            return res.send(response(baseResponse.SUCCESS, articleListResult));
-        } else {
-            const localAdListResult = await articleProvider.retrieveLocalAdList(latitude.latitude, longitude.longitude);
-            return res.send(response(baseResponse.SUCCESS, localAdListResult));
-        }   
+    if (isAd == "N") {
+        // 판매 글 조회
+        const articleListResult = await articleProvider.retrieveArticleList(latitude.latitude, longitude.longitude, categoryList);
+        return res.send(response(baseResponse.SUCCESS, articleListResult));
     } else {
-        // userIdx 가 올린 글 조회
-        if (isAd == "Y") {
-            return res.send(response(baseResponse.ARTICLE_ISAD_WRONG));
-        } else {
-            const articleByUserIdx = await articleProvider.retrieveArticleByUserIdx(userIdx);
-            return res.send(articleByUserIdx);
-        }
-    }
+        // 지역광고 글 조회
+        const localAdListResult = await articleProvider.retrieveLocalAdList(latitude.latitude, longitude.longitude, categoryList);
+        return res.send(response(baseResponse.SUCCESS, localAdListResult));
+    }   
 };
 
 /*
