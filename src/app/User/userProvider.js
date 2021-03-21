@@ -64,3 +64,11 @@ exports.retrieveUserProfile = async function(userIdx) {
 
     return response(baseResponse.SUCCESS, userProfileResult[0]);
 }
+
+exports.retrieveLikes = async function(articleIdx, userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const likeResult = await userDao.selectLikesByUserIdx(connection, articleIdx, userIdx);
+    connection.release();
+
+    return likeResult;
+}

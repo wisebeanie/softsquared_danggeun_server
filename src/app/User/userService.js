@@ -11,6 +11,8 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const {connect} = require("http2");
 
+const articleProvider = require("../Article/articleProvider");
+
 // Service: Create, Update, Delete 비즈니스 로직 처리
 
 exports.createUser = async function (nickName, phoneNumber, profileImgUrl, town, countryIdx, longitude, latitude) {
@@ -97,6 +99,54 @@ exports.editProfile = async function(userIdx, profileImgUrl, nickName) {
     } catch (err) {
         logger.error(`App - editProfile Service error\n: ${err.message}`);
         connection.release();
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};
+
+exports.updateLikeStatus = async function(articleIdx, userIdx, status) {
+    
+    try {
+        // articleIdx 있는지 확인
+        const articleByIdx = await articleProvider.retrieveArticleIdx(articleIdx);
+        if (articleByIdx.length < 1) {
+            return errResponse(baseResponse.ARTICLE_ARTICLE_NOT_EXIST);
+        }
+        const connection = await pool.getConnection(async (conn) => conn);
+        // 좋아요 활성
+        if (status == "DELETED") {
+            status = "ACTIVE";
+            const activateLikes = await userDao.updateLikes(connection, articleIdx, userIdx, status);
+            connection.release();
+            return response(baseResponse.SUCCESS, "좋아요가 활성되었습니다.");
+        } else {
+            // 좋아요 취소
+            status = "DELETED";
+            const deleteLikes = await userDao.updateLikes(connection, articleIdx, userIdx, status);
+            connection.release();
+            return response(baseResponse.SUCCESS, "좋아요가 비활성되었습니다.");
+        }
+    } catch (err) {
+        logger.error(`App - updateLikeStatus Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};
+
+exports.insertLike = async function(articleIdx, userIdx) {
+    try {
+        // articleIdx 있는지 확인
+        const articleByIdx = await articleProvider.retrieveArticleIdx(articleIdx);
+        if (articleByIdx.length < 1) {
+            return errResponse(baseResponse.ARTICLE_ARTICLE_NOT_EXIST);
+        }
+
+        const connection = await pool.getConnection(async (conn) => conn);
+        const insertLikeParams = [articleIdx, userIdx];
+        const insertLikeResult = await userDao.insertLike(connection, insertLikeParams);
+        connection.release();
+
+        return response(baseResponse.SUCCESS, "좋아요가 활성되었습니다.");
+    } catch (err) {
+        logger.error(`App - insertLike Service error\n: ${err.message}`);
         return errResponse(baseResponse.DB_ERROR);
     }
 };

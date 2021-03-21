@@ -184,3 +184,11 @@ exports.retrieveSalesByUserIdx = async function(userIdx) {
 
     return response(baseResponse.SUCCESS, articleResult);
 }
+
+exports.retrieveArticleIdx = async function(articleIdx) {
+    const connection = await pool.getConnection(async (conn) =>  conn);
+    const articleResult = await articleDao.selectArticleByArticleIdx(connection, articleIdx);
+    connection.release();
+
+    return articleResult;
+}

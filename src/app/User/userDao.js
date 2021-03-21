@@ -119,14 +119,49 @@ async function updateProfile(connection, userIdx, profileImgUrl, nickName) {
     return updateProfileRow;
 };
 
+async function selectLikesByUserIdx(connection, articleIdx, userIdx) {
+    const selectLikesByUserIdxQuery = `
+                SELECT status
+                FROM LikedArticle
+                WHERE articleIdx = ${articleIdx} and userIdx = ${userIdx};
+                `;
+    const [likesRow] = await connection.query(selectLikesByUserIdxQuery, articleIdx, userIdx);
+
+    return likesRow;
+};
+
+async function updateLikes(connection, articleIdx, userIdx, status) {
+    const updateLikesQuery = `
+                UPDATE LikedArticle
+                SET status = '${status}'
+                WHERE articleIdx = ${articleIdx} and userIdx = ${userIdx};
+                `;
+    const [updatelikeRow] = await connection.query(updateLikesQuery, articleIdx, userIdx, status);
+
+    return updatelikeRow;
+};
+
+async function insertLike(connection, insertLikeParams) {
+    const insertLikeQuery = `
+                INSERT INTO LikedArticle(articleIdx, userIdx)
+                VALUES (?, ?);
+                `;
+    const insertLikeRow = await connection.query(insertLikeQuery, insertLikeParams);
+
+    return insertLikeRow;
+};
+
 module.exports = {
-  insertUser,
-  selectUserPhoneNumber,
-  selectUserAccount,
-  selectUserNickName,
-  selectLatitude,
-  selectLongitude,
-  selectUserByIdx,
-  selectUserProfile,
-  updateProfile
+    insertUser,
+    selectUserPhoneNumber,
+    selectUserAccount,
+    selectUserNickName,
+    selectLatitude,
+    selectLongitude,
+    selectUserByIdx,
+    selectUserProfile,
+    updateProfile,
+    selectLikesByUserIdx,
+    updateLikes,
+    insertLike
 };

@@ -39,6 +39,7 @@ module.exports = function(app){
     // 21. 판매 내역 조회 API (판매 상태에 따라 조회)
     app.get('/app/users/:userIdx/sales', jwtMiddleware, user.getUserSales);
 
-    // 23. 
+    // 23. 관심등록 API
+    app.post('/app/users/likes', jwtMiddleware, user.postLikes);
 
 };

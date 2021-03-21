@@ -498,3 +498,46 @@ exports.getUserSales = async function(req, res) {
         return res.send(userSalesResult);
     }
 };
+
+/*
+    API No. 23
+    API Name : 관심 등록 API
+    [POST] /app/users/likes
+*/
+exports.postLikes = async function(req, res) {
+    /*
+        Body : articleIdx, userIdx
+    */
+    const { articleIdx, userIdx } = req.body;
+
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    if (!articleIdx) {
+        return res.send(response(baseResponse.ARTICLE_ARTICLEIDX_EMPTY));
+    } else if (!userIdx) {
+        return res.send(response(baseResponse.USER_USERIDX_EMPTY));
+    }
+
+    if (userIdx != userIdxFromJWT) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
+
+    const likeByUserIdx = await userProvider.retrieveLikes(articleIdx, userIdx);
+
+    if (likeByUserIdx.length > 0) {
+        // 좋아요가 이미 존재
+        if (likeByUserIdx[0].status == "DELETED") {
+            // 삭제된 좋아요 다시 누르기
+            const activateLikes = await userService.updateLikeStatus(articleIdx, userIdx, likeByUserIdx[0].status);
+            return res.send(activateLikes);
+        } else {
+            // 좋아요 취소
+            const deleteLikes = await userService.updateLikeStatus(articleIdx, userIdx, likeByUserIdx[0].status);
+            return res.send(deleteLikes);
+        }
+    } else {
+        // 새로 좋아요 생성
+        const insertLikeResponse = await userService.insertLike(articleIdx, userIdx);
+        return res.send(insertLikeResponse);
+    }
+}
