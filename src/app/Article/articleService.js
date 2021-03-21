@@ -56,14 +56,14 @@ exports.createLocalAd = async function (userIdx, title, description, articleImgU
         if (articleImgUrl) {
             // 이미지 입력한 경우
             for (img of articleImgUrl) {
-                const insertArticleImgParams = [articleIdx, img];
+                const insertArticleImgParams = [localAdIdx, img];
                 const articleImgResult = await articleDao.insertArticleImg(connection, insertArticleImgParams);
             }
         } else {
             // 기본이미지
             const categoryImgRow = await articleProvider.categoryImgCheck(categoryIdx);
             articleImgUrl = categoryImgRow;
-            const insertArticleImgParams = [articleIdx, articleImgUrl];
+            const insertArticleImgParams = [localAdIdx, articleImgUrl];
             const articleImgResult = await articleDao.insertArticleImg(connection, insertArticleImgParams);
         }
         
