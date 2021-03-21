@@ -4,6 +4,7 @@ const { logger } = require("../../../config/winston");
 const baseResponse = require("../../../config/baseResponseStatus");
 
 const userDao = require("./userDao");
+const articleDao = require("../Article/articleDao");
 
 exports.phoneNumberCheck = async function (phoneNumber) {
     const connection = await pool.getConnection(async (conn) => conn);
@@ -63,12 +64,25 @@ exports.retrieveUserProfile = async function(userIdx) {
     }
 
     return response(baseResponse.SUCCESS, userProfileResult[0]);
-}
+};
 
 exports.retrieveLikes = async function(articleIdx, userIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
-    const likeResult = await userDao.selectLikesByUserIdx(connection, articleIdx, userIdx);
+    const likeResult = await userDao.selectLikes(connection, articleIdx, userIdx);
     connection.release();
 
     return likeResult;
-}
+};
+
+exports.retrieveLikesByUserIdx = async function(userIdx, isAd) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const likesList = await userDao.selectLikesByUserIdx(connection, userIdx, isAd);
+    for (article of likesList) {
+        const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
+        const img = articleImgResult[0];
+        article.representativeImg = img;
+    }
+    connection.release();
+
+    return response(baseResponse.SUCCESS, likesList);
+};

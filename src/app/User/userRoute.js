@@ -42,4 +42,6 @@ module.exports = function(app){
     // 23. 관심등록 API
     app.post('/app/users/likes', jwtMiddleware, user.postLikes);
 
+    // 24. 관심 목록 조회 API (글 종류에 따라)
+    app.get('/app/users/:userIdx/likes', jwtMiddleware, user.getUserLikes);
 };

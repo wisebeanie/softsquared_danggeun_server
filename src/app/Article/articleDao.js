@@ -496,7 +496,7 @@ async function selectArticleByStatus(connection, userIdx, status) {
                         end as chatCount,
                     case when Article.status = 'SOLD'
                         then '거래완료'
-                        when Article.status = "RESERVED"
+                        when Article.status = 'RESERVED'
                             then '예약중'
                         else Article.status
                         end as status
@@ -558,7 +558,7 @@ async function selectHideArticles(connection, userIdx) {
                         end as chatCount,
                     case when Article.status = 'SOLD'
                         then '거래완료'
-                        when Article.status = "RESERVED"
+                        when Article.status = 'RESERVED'
                             then '예약중'
                         else Article.status
                         end as status
@@ -567,7 +567,7 @@ async function selectHideArticles(connection, userIdx) {
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                WHERE isAd = 'N' and Article.hide = 'Y' and Article.userIdx = '${userIdx}'
+                WHERE isAd = 'N' and Article.hide = 'Y' and Article.userIdx = '${userIdx}' and Article.status != 'DELETED'
                 group by Article.idx;
                 `;
     const [hideArticleRows] = await connection.query(selectHideArticlesQuery, userIdx);
@@ -620,7 +620,7 @@ async function selectSalesUserIdx(connection, userIdx) {
                         end as chatCount,
                     case when Article.status = 'SOLD'
                         then '거래완료'
-                        when Article.status = "RESERVED"
+                        when Article.status = 'RESERVED'
                             then '예약중'
                         else Article.status
                         end as status
@@ -629,7 +629,7 @@ async function selectSalesUserIdx(connection, userIdx) {
                         left join ArticleImg on ArticleImg.articleIdx = Article.idx
                         left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
                         left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                    WHERE isAd = 'N' and Article.userIdx = ? and hide != 'Y' and status != 'DELETED'
+                    WHERE isAd = 'N' and Article.userIdx = ? and hide != 'Y' and Article.status != 'DELETED'
                     group by Article.idx;
                     `;
     const [salesByUserIdxRows] = await connection.query(selectSalesUserIdxQuery, userIdx);
