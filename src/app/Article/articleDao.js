@@ -88,10 +88,18 @@ async function selectArticles (connection, latitude, longitude, categoryList) {
                             then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
                         when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
                             then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
-                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 7
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
-                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) = 1
+                            then '지난 주'
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) < 4 and timestampdiff(week, Article.updatedAt, current_timestamp) > 1
+                            then concat(timestampdiff(week, Article.updatedAt, current_timestamp), '주 전')
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) = 1
+                            then '지난 달'
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12 and timestampdiff(month, Article.updatedAt, current_timestamp) > 1
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
+                        when timestampdiff(year, Article.updatedAt, current_timestamp) = 1
+                            then '지난 해'
                         else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
                         end as updateAt,
                     case when liked is null
@@ -152,10 +160,18 @@ async function selectLocalAds (connection, latitude, longitude, categoryList) {
                             then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
                         when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
                             then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
-                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 7
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
-                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) = 1
+                            then '지난 주'
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) < 4 and timestampdiff(week, Article.updatedAt, current_timestamp) > 1
+                            then concat(timestampdiff(week, Article.updatedAt, current_timestamp), '주 전')
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) = 1
+                            then '지난 달'
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12 and timestampdiff(month, Article.updatedAt, current_timestamp) > 1
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
+                        when timestampdiff(year, Article.updatedAt, current_timestamp) = 1
+                            then '지난 해'
                         else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
                         end as updateAt,
                     case when liked is null
@@ -234,10 +250,18 @@ async function selectArticleIdx(connection, articleIdx, userIdx) {
                             then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
                         when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
                             then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
-                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 7
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
-                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) = 1
+                            then '지난 주'
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) < 4 and timestampdiff(week, Article.updatedAt, current_timestamp) > 1
+                            then concat(timestampdiff(week, Article.updatedAt, current_timestamp), '주 전')
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) = 1
+                            then '지난 달'
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12 and timestampdiff(month, Article.updatedAt, current_timestamp) > 1
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
+                        when timestampdiff(year, Article.updatedAt, current_timestamp) = 1
+                            then '지난 해'
                         else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
                         end as updatedAt,
                     description,
@@ -299,10 +323,18 @@ async function selectLocalAdIdx(connection, articleIdx, userIdx) {
                             then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
                         when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
                             then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
-                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 7
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
-                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) = 1
+                            then '지난 주'
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) < 4 and timestampdiff(week, Article.updatedAt, current_timestamp) > 1
+                            then concat(timestampdiff(week, Article.updatedAt, current_timestamp), '주 전')
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) = 1
+                            then '지난 달'
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12 and timestampdiff(month, Article.updatedAt, current_timestamp) > 1
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
+                        when timestampdiff(year, Article.updatedAt, current_timestamp) = 1
+                            then '지난 해'
                         else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
                         end as updatedAt,
                     description,
@@ -440,10 +472,18 @@ async function selectArticleByStatus(connection, userIdx, status) {
                             then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
                         when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
                             then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
-                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 7
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
-                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) = 1
+                            then '지난 주'
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) < 4 and timestampdiff(week, Article.updatedAt, current_timestamp) > 1
+                            then concat(timestampdiff(week, Article.updatedAt, current_timestamp), '주 전')
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) = 1
+                            then '지난 달'
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12 and timestampdiff(month, Article.updatedAt, current_timestamp) > 1
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
+                        when timestampdiff(year, Article.updatedAt, current_timestamp) = 1
+                            then '지난 해'
                         else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
                         end as updateAt,
                     case when liked is null
@@ -494,10 +534,18 @@ async function selectHideArticles(connection, userIdx) {
                             then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
                         when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
                             then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
-                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 7
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
-                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) = 1
+                            then '지난 주'
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) < 4 and timestampdiff(week, Article.updatedAt, current_timestamp) > 1
+                            then concat(timestampdiff(week, Article.updatedAt, current_timestamp), '주 전')
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) = 1
+                            then '지난 달'
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12 and timestampdiff(month, Article.updatedAt, current_timestamp) > 1
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
+                        when timestampdiff(year, Article.updatedAt, current_timestamp) = 1
+                            then '지난 해'
                         else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
                         end as updateAt,
                     case when liked is null
@@ -548,10 +596,18 @@ async function selectSalesUserIdx(connection, userIdx) {
                             then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
                         when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
                             then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
-                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 31
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 7
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
-                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) = 1
+                            then '지난 주'
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) < 4 and timestampdiff(week, Article.updatedAt, current_timestamp) > 1
+                            then concat(timestampdiff(week, Article.updatedAt, current_timestamp), '주 전')
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) = 1
+                            then '지난 달'
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12 and timestampdiff(month, Article.updatedAt, current_timestamp) > 1
                             then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
+                        when timestampdiff(year, Article.updatedAt, current_timestamp) = 1
+                            then '지난 해'
                         else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
                         end as updateAt,
                     case when liked is null
