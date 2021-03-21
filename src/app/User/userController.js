@@ -254,7 +254,7 @@ exports.postUsers = async function(req, res) {
             addresses.push(document.address_name);
         }
         
-        if (addresses.length > 1 || addresses.length == 0) {
+        if (addresses.length == 0) {
             return res.send(response(baseResponse.SIGNUP_ADDRESS_WRONG));
         } else {
             const town = kakaoPlaces.documents[0].address_name;
