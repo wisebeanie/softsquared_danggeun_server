@@ -38,16 +38,20 @@ exports.createComment = async function(articleIdx, userIdx, parentCommentIdx, co
     }
 };
 
-exports.editComment = async function(commentIdx, status) {
+exports.editComment = async function(commentIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
     try {
         await connection.beginTransaction();
-        const editCommentResult = await commentDao.updateComment(connection, commentIdx, status);
         const commentResult = await commentDao.selectCommentByIdx(connection, commentIdx);
+        
+        if (commentResult[0].status == "DELETED") {
+            return errResponse(baseResponse.COMMENT_NOT_EXIST);
+        }
+        const editCommentResult = await commentDao.updateComment(connection, commentIdx);
         await connection.commit();
         connection.release();
 
-        return response(baseResponse.SUCCESS, {"edited status": commentResult[0].status});
+        return response(baseResponse.SUCCESS, "댓글이 삭제되었습니다.");
     } catch (err) {
         logger.error(`App - editComment Service Error\n: ${err.message}`);
         await connection.rollback();

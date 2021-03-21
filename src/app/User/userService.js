@@ -23,12 +23,6 @@ exports.createUser = async function (nickName, phoneNumber, profileImgUrl, town,
             return errResponse(baseResponse.SIGNUP_REDUNDANT_PHONENUMBER);
         }
 
-        // 닉네임 중복 확인
-        const nickNameRows = await userProvider.nickNameCheck(nickName);
-        if (nickNameRows.length > 0) {
-            return errResponse(baseResponse.SIGNUP_REDUNDANT_NICKNAME);
-        }
-
         // TODO
         // contryIdx 존재 여부 확인
 

@@ -114,13 +114,13 @@ async function selectCommentByIdx(connection, commentIdx) {
     return commentRow;
 };
 
-async function updateComment(connection, commentIdx, status) {
+async function updateComment(connection, commentIdx) {
     const updateCommentQuery = `
                 UPDATE Comment
-                SET status = '${status}'
+                SET status = 'DELETED'
                 WHERE idx = ${commentIdx};
                 `;
-    const updateCommentRow = await connection.query(updateCommentQuery, commentIdx, status);
+    const updateCommentRow = await connection.query(updateCommentQuery, commentIdx);
 
     return updateCommentRow[0];
 };
