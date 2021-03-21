@@ -93,6 +93,9 @@ module.exports = {
     ARTICLE_STATUS_ERROR_TYPE : { "isSuccess": false, "code": 2060, "message": "status는 SALE, SOLD, HIDE 중 하나로 입력해주세요." },
     ARTICLE_STATUS_EMPTY : { "isSuccess": false, "code": 2061, "message": "status를 입력해주세요." },
 
+    LOCALAD_CANT_CATEGORY_SEARCH : { "isSuccess": false, "code": 2062, "message": "카테고리 필터는 판매 글만 가능합니다." },
+    
+
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},

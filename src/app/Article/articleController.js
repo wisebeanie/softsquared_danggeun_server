@@ -145,6 +145,17 @@ exports.getArticles = async function(req, res) {
     if (!isAd) {
         isAd = "N";
     }
+    if (!categoryList) {
+        return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_EMPTY));
+    } else if (isAd == "Y" && categoryList) {
+        return res.send(response(baseResponse.LOCALAD_CANT_CATEGORY_SEARCH));
+    } 
+
+    for (categoryIdx of categoryList) {
+        if (categoryIdx > 15 || categoryIdx < 1) {
+            return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_WRONG));
+        }
+    }
 
     // 로그인 된 유저의 위경도
     const latitude = await userProvider.retrieveLatitude(userIdxFromJWT);
