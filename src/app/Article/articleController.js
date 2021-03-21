@@ -282,3 +282,48 @@ exports.patchArticle = async function(req, res) {
         return res.send(editLocalAd);
     }
 };
+
+/*
+    API No. 22
+    API Name : 글 상태 수정 API
+    [PATCH] /app/articles/{articleIdx}/status
+*/
+exports.patchArticleStatus = async function(req, res) {
+    // Path Variable : articleIdx
+    const articleIdx = req.params.articleIdx;
+
+    /*
+        Body : status, hideOrNot
+    */
+    const { status, hideOrNot } = req.body;
+
+    // get UserIdx
+    const userIdxResult = await articleProvider.articleIdxCheck(articleIdx);
+    if (userIdxResult.length < 1) {
+        return res.send(response(baseResponse.ARTICLE_ARTICLE_NOT_EXIST));
+    }
+    const userIdx = userIdxResult[0].userIdx;
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    if (!articleIdx) {
+        return res.send(response(baseResponse.ARTICLE_ARTICLEIDX_EMPTY));
+    }
+
+    if (userIdx != userIdxFromJWT) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
+
+    if (!status) {
+        return res.send(response(baseResponse.ARTICLE_STATUS_EMPTY));
+    } else if (status == "RESERVED" || status == "SOLD" || status == "DELETED" || status == "SALE") {
+        const editStatus = await articleService.editArticleStatus(articleIdx, status);
+        return res.send(editStatus);
+    } else if (status == "HIDE" && hideOrNot) {
+        const editStatus = await articleService.editArticleHide(articleIdx, hideOrNot);
+        return res.send(editStatus);
+    } else if (status == "HIDE" && !hideOrNot) {
+        return res.send(response(baseResponse.ARTICLE_HIDE_OR_NOT_EMPTY));
+    } else {
+        return res.send(response(baseResponse.ARTICLE_EDIT_STATUS_WRONG));
+    }
+};

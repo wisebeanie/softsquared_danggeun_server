@@ -130,8 +130,36 @@ exports.editLocalAd = async function(articleIdx, articleImgUrl, description, tit
 
         return response(baseResponse.SUCCESS);
     } catch (err) {
-        logger.error(`App - editLocalAd Service Error\n ${err.message}`);
+        logger.error(`App - editLocalAd Service Error\n: ${err.message}`);
         await connection.rollback();
+        connection.release();
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};
+
+exports.editArticleStatus = async function(articleIdx, status) {
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+        const editStatusResult = await articleDao.updateArticleStatus(connection, articleIdx, status);
+        connection.release();
+
+        return response(baseResponse.SUCCESS);
+    } catch (err) {
+        logger.error(`App - editArticleStatus Service Error\n: ${err.message}`);
+        connection.release();
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};
+
+exports.editArticleHide = async function(articleIdx, hideOrNot) {
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+        const editArticleHideResult = await articleDao.updateArticleHide(connection, articleIdx, hideOrNot);
+        connection.release();
+
+        return response(baseResponse.SUCCESS);
+    } catch (err) {
+        logger.error(`APP - editArticleHide Service Error\n: ${err.message}`);
         connection.release();
         return errResponse(baseResponse.DB_ERROR);
     }

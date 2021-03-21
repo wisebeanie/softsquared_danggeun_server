@@ -22,4 +22,7 @@ module.exports = function(app) {
 
     // 17. 글 수정 API
     app.patch('/app/articles/:articleIdx', jwtMiddleware, article.patchArticle);
+
+    // 22. 글 상태 수정 API
+    app.patch('/app/articles/:articleIdx/status', jwtMiddleware, article.patchArticleStatus);
 }

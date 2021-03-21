@@ -581,6 +581,28 @@ async function selectSalesUserIdx(connection, userIdx) {
     return salesByUserIdxRows;
 };
 
+async function updateArticleStatus(connection, articleIdx, status) {
+    const updateArticleStatusQuery = `
+                UPDATE Article
+                SET status = '${status}'
+                WHERE idx = ${articleIdx}
+                `;
+    const [updateArticleRow] = await connection.query(updateArticleStatusQuery, articleIdx, status);
+
+    return updateArticleRow;
+};
+
+async function updateArticleHide(connection, articleIdx, hideOrNot) {
+    const updateArticleHideQuery = `
+                UPDATE Article
+                SET hide = '${hideOrNot}'
+                WHERE idx = ${articleIdx};
+                `;
+    const [updateArticleHideRow] = await connection.query(updateArticleHideQuery, articleIdx, hideOrNot);
+
+    return updateArticleHideRow;
+};
+
 module.exports = {
     insertArticle,
     insertArticleImg,
@@ -601,5 +623,7 @@ module.exports = {
     updateLocalAd,
     selectArticleByStatus,
     selectHideArticles,
-    selectSalesUserIdx
+    selectSalesUserIdx,
+    updateArticleStatus,
+    updateArticleHide
 };
