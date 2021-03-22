@@ -187,4 +187,22 @@ exports.deleteJWT = async function(userIdx) {
         logger.error(`App - deleteJWT Service error\n: ${err.message}`);
         return errResponse(baseResponse.DB_ERROR);
     }
+};
+
+exports.withDrawUser = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+        connection.beginTransaction();
+        const withDrawUserResult = await userDao.withDrawUser(connection, userIdx);
+        const deleteJWTResult = await userDao.deleteJWT(connection, userIdx);
+        connection.commit();
+        connection.release();
+
+        return response(baseResponse.SUCCESS, {"userIdx": userIdx});
+    } catch (err) {
+        logger.error(`App - withDrawUser Service error\n: ${err.message}`);
+        await connection.rollback();
+        connection.release();
+        return errResponse(baseResponse.DB_ERROR);
+    }
 }

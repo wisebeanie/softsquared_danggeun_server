@@ -642,3 +642,23 @@ exports.logOut = async function(req, res) {
     
     return res.send(logOutResponse);
 }
+
+/*
+    API No. 28
+    API Name : 탈퇴하기 API
+    [PATCH] /app/users/{userIdx}/withdraw
+*/
+exports.withDrawUser = async function(req, res) {
+    // Path Varialble : userIdx
+    const userIdx = req.params.userIdx;
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
+
+    const withDrawUserResponse = await userService.withDrawUser(userIdx);
+
+    return res.send(withDrawUserResponse);
+};

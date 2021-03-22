@@ -50,4 +50,7 @@ module.exports = function(app){
 
     // 27. 로그아웃 API
     app.get('/app/logout', jwtMiddleware, user.logOut);
+
+    // 28. 탈퇴하기 API
+    app.patch('/app/users/:userIdx/withdraw', user.withDrawUser);
 };

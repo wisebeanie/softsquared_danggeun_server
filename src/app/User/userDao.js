@@ -272,6 +272,17 @@ async function deleteJWT(connection, userIdx) {
     return deleteJWTRow;
 };
 
+async function withDrawUser(connection, userIdx) {
+    const withDrawUserQuery = `
+                UPDATE User
+                SET status = 'DELETED'
+                WHERE idx = ?;
+                `;
+    const withDrawUserRow = await connection.query(withDrawUserQuery, userIdx);
+
+    return withDrawUserRow;
+};
+
 module.exports = {
     insertUser,
     selectUserPhoneNumber,
@@ -290,5 +301,6 @@ module.exports = {
     updateTownAuth,
     insertToken,
     selectJWT,
-    deleteJWT
+    deleteJWT,
+    withDrawUser
 };
