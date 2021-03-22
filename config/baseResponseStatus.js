@@ -102,6 +102,8 @@ module.exports = {
     AUTH_LATITUDE_EMPTY : { "isSuccess": false, "code": 2065, "message": "현재 위도를 입력해주세요." },
     AUTH_LONGITUDE_EMPTY : { "isSuccess": false, "code": 2066, "message": "현재 경도를 입력해주세요." },
 
+    AUTH_INPUT_WRONG : { "isSuccess": false, "code": 2067, "message": "address와 currentLatitude, currentLongitude는 같이 입력할 수 없습니다." },
+
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},
@@ -131,8 +133,10 @@ module.exports = {
     USER_USER_NOT_EXIST : { "isSuccess": false, "code": 3018, "message": "해당 유저는 존재하지 않습니다." },
 
     AUTH_TOWN_FAIL : { "isSuccess": false, "code": 3019, "message": "동네 인증에 실패했습니다." },
-    
 
+    ALREADY_LOGIN : { "isSuccess": false, "code": 3020, "message": "이미 로그인된 유저입니다." },
+    NOT_LOGIN : { "isSuccess": false, "code": 3021, "message": "로그인되지 않았습니다." },
+    
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},
     SERVER_ERROR : { "isSuccess": false, "code": 4001, "message": "서버 에러"},

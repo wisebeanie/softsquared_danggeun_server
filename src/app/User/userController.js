@@ -210,7 +210,7 @@ exports.postUsers = async function(req, res) {
     /*
         Body : nickName, phoneNumber, profileImgUrl, town, countryIdx
     */
-    const {nickName, phoneNumber, profileImgUrl, town, countryIdx} = req.body;
+    var {nickName, phoneNumber, profileImgUrl, town, countryIdx} = req.body;
 
     if (!nickName) {
         return res.send(response(baseResponse.SIGNUP_NICKNAME_EMPTY));
@@ -230,6 +230,10 @@ exports.postUsers = async function(req, res) {
         return res.send(response(baseResponse.SIGNUP_PHONENUMBER_ERROR_TYPE));
     } else if (!regAddress.test(town)) {
         return res.send(response(baseResponse.SIGNUP_ADDRESS_ERROR_TYPE));
+    }
+
+    if (!profileImgUrl) {
+        profileImgUrl = 'BASICIMGURL';
     }
 
     const encodedTown = queryString.escape(town);
@@ -260,13 +264,8 @@ exports.postUsers = async function(req, res) {
             const town = kakaoPlaces.documents[0].address_name;
             const longitude = kakaoPlaces.documents[0].x;
             const latitude = kakaoPlaces.documents[0].y;
-            if (!profileImgUrl) {
-                const signUpResponse = await userService.createUser(nickName, phoneNumber, "BASICIMGURL", town, countryIdx, longitude, latitude);
-                return res.send(signUpResponse);
-            } else {
-                const signUpResponse = await userService.createUser(nickName, phoneNumber, profileImgUrl, town, countryIdx, longitude, latitude);
-                return res.send(signUpResponse);
-            }
+            const signUpResponse = await userService.createUser(nickName, phoneNumber, profileImgUrl, town, countryIdx, longitude, latitude);
+            return res.send(signUpResponse);
         }
     });
 };
@@ -344,10 +343,15 @@ exports.check = async function (req, res) {
 
     const userIdxFromJWT = req.verifiedToken.userIdx;
 
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdxFromJWT);
+
     if (!userIdxFromJWT) {
         return res.send(errResponse(baseResponse.SIGNIN_JWT_TOKEN_NOT_EXIST));
-    } else {
+    } else if (token == checkJWT[0].jwt) {
         return res.send(response(baseResponse.SUCCESS, {"userIdx": userIdxFromJWT}));
+    } else {
+        return res.send(response(baseResponse.TOKEN_VERIFICATION_FAILURE));
     }
 };
 
@@ -399,14 +403,16 @@ exports.authEmailCertify = function (req, res) {
 exports.getUserByIdx = async function(req, res) {
     // Path Variable : userIdx
     const userIdx = req.params.userIdx;
-    const userIdxFromJWT = req.verifiedToken.userIdx;
 
     if (!userIdx) {
         return res.send(response(baseResponse.USER_USERIDX_EMPTY));
     }
-    if (userIdx != userIdxFromJWT) {
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
-    }
+    } 
     const userIdxResult = await userProvider.retrieveUserByIdx(userIdx);
 
     return res.send(userIdxResult);
@@ -437,7 +443,6 @@ exports.getUserProfile = async function(req, res) {
 exports.patchUserProfile = async function(req, res) {
     // Path Variable : userIdx
     const userIdx = req.params.userIdx;
-    const userIdxFromJWT = req.verifiedToken.userIdx;
 
     /*
         Body : profileImgUrl, nickName
@@ -447,9 +452,12 @@ exports.patchUserProfile = async function(req, res) {
     if (!userIdx) {
         return res.send(response(baseResponse.USER_USERIDX_EMPTY));
     }
-    if (userIdx != userIdxFromJWT) {
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
-    }
+    } 
 
     if (!profileImgUrl) {
         return res.send(response(baseResponse.PROFILE_PROFILEIMG_EMPTY));
@@ -472,7 +480,6 @@ exports.getUserSales = async function(req, res) {
     // Query String
     const status = req.query.status;
 
-    const userIdxFromJWT = req.verifiedToken.userIdx;
 
     if (!userIdx) {
         return res.send(response(baseResponse.USER_USERIDX_EMPTY));
@@ -480,7 +487,10 @@ exports.getUserSales = async function(req, res) {
         return res.send(response(baseResponse.ARTICLE_STATUS_ERROR_TYPE));
     }
 
-    if (status == 'HIDE' && (userIdx != userIdxFromJWT)) {
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+
+    if (status == 'HIDE' && (checkJWT.length < 1 || token != checkJWT[0].jwt)) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
     }
 
@@ -510,7 +520,6 @@ exports.postLikes = async function(req, res) {
     */
     const { articleIdx, userIdx } = req.body;
 
-    const userIdxFromJWT = req.verifiedToken.userIdx;
 
     if (!articleIdx) {
         return res.send(response(baseResponse.ARTICLE_ARTICLEIDX_EMPTY));
@@ -518,9 +527,11 @@ exports.postLikes = async function(req, res) {
         return res.send(response(baseResponse.USER_USERIDX_EMPTY));
     }
 
-    if (userIdx != userIdxFromJWT) {
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
-    }
+    } 
 
     const likeByUserIdx = await userProvider.retrieveLikes(articleIdx, userIdx);
 
@@ -550,16 +561,18 @@ exports.postLikes = async function(req, res) {
 exports.getUserLikes = async function(req, res) {
     // Path Variable : userIdx
     const userIdx = req.params.userIdx;
-    const userIdxFromJWT = req.verifiedToken.userIdx;
 
     // Query String : isAd
     const isAd = req.query.isAd;
 
     if (!userIdx) {
         return res.send(response(baseResponse.USER_USERIDX_EMPTY));
-    } else if (userIdx != userIdxFromJWT) {
+    } 
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
-    }
+    } 
 
     if (!isAd) {
         return res.send(response(baseResponse.ARTICLE_ISAD_EMPTY));
@@ -578,7 +591,6 @@ exports.getUserLikes = async function(req, res) {
 exports.patchTownAuth = async function(req, res) {
     // Path Variable : userIdx
     const userIdx = req.params.userIdx;
-    const userIdxFromJWT = req.verifiedToken.userIdx;
 
     /*
         Body : currentLatitude, currentLongitude
@@ -587,9 +599,13 @@ exports.patchTownAuth = async function(req, res) {
 
     if (!userIdx) {
         return res.send(response(baseResponse.ARTICLE_USERIDX_EMPTY));
-    } else if (userIdx != userIdxFromJWT) {
+    } 
+    
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
-    }
+    } 
 
     if (!currentLatitude) {
         return res.send(response(baseResponse.AUTH_LATITUDE_EMPTY));
@@ -605,3 +621,24 @@ exports.patchTownAuth = async function(req, res) {
 
     return res.send(patchTownAuthResponse);
 };
+
+/*
+    API No. 27
+    API Name : 로그아웃 API
+    [GET] /app/logout
+*/
+exports.logOut = async function(req, res) {
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    const token = req.headers['x-access-token'];    
+    const checkJWT = await userProvider.checkJWT(userIdxFromJWT);
+    if (checkJWT.length < 1) {
+        return res.send(response(baseResponse.NOT_LOGIN));
+    } else if (token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.TOKEN_VERIFICATION_FAILURE));
+    } 
+
+    const logOutResponse = await userService.deleteJWT(userIdxFromJWT);
+    
+    return res.send(logOutResponse);
+}

@@ -86,3 +86,11 @@ exports.retrieveLikesByUserIdx = async function(userIdx, isAd) {
 
     return response(baseResponse.SUCCESS, likesList);
 };
+
+exports.checkJWT = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const checkJWTResult = await userDao.selectJWT(connection, userIdx);
+    connection.release();
+
+    return checkJWTResult;
+};

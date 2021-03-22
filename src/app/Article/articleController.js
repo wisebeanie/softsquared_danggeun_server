@@ -19,14 +19,10 @@ exports.postArticles = async function(req, res) {
         Body : userIdx, title, description, articleImgUrl, price, categoryIdx, suggestPrice 
     */
     var {userIdx, title, description, articleImgUrl, price, categoryIdx, suggestPrice } = req.body;
-  
-    const userIdxFromJWT = req.verifiedToken.userIdx;
     
     if (!userIdx) {
         return res.send(response(baseResponse.ARTICLE_USERIDX_EMPTY));
-    } else if (userIdx != userIdxFromJWT) {
-        res.send(errResponse(baseResponse.USER_IDX_NOT_MATCH));
-    } else if (!title) {
+    }  else if (!title) {
         return res.send(response(baseResponse.ARTICLE_TITLE_EMPTY));
     } else if (!description) {
         return res.send(response(baseResponse.ARTICLE_DESCRIPTION_EMPTY));
@@ -35,6 +31,12 @@ exports.postArticles = async function(req, res) {
     } else if (categoryIdx < 1 || categoryIdx > 15) {
         return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_WRONG));
     }
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    } 
 
     if (title.length > 100) {
         return res.send(response(baseResponse.ARTICLE_TITLE_LENGTH));
@@ -64,12 +66,9 @@ exports.postLocalAds = async function(req, res) {
     */
     var {userIdx, title, description, articleImgUrl, price, categoryIdx, noChat, phoneNumber} = req.body;
 
-    const userIdxFromJWT = req.verifiedToken.userIdx;
 
     if (!userIdx) {
         return res.send(response(baseResponse.ARTICLE_USERIDX_EMPTY));
-    } else if (userIdx != userIdxFromJWT) {
-        res.send(errResponse(baseResponse.USER_IDX_NOT_MATCH));
     } else if (!title) {
         return res.send(response(baseResponse.ARTICLE_TITLE_EMPTY));
     } else if (!description) {
@@ -79,6 +78,12 @@ exports.postLocalAds = async function(req, res) {
     } else if (categoryIdx < 16 || categoryIdx > 22) {
         return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_WRONG));
     }
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    } 
 
     if (title.length > 100) {
         return res.send(response(baseResponse.ARTICLE_TITLE_LENGTH));
@@ -141,7 +146,7 @@ exports.getArticles = async function(req, res) {
 
     // 현재 로그인 된 유저
     const userIdxFromJWT = req.verifiedToken.userIdx;
-
+    
     if (!isAd) {
         isAd = "N";
     }
@@ -234,11 +239,12 @@ exports.patchArticle = async function(req, res) {
     }
 
     const userIdx = checkArticleIdx[0].userIdx;
-    const userIdxFromJWT = req.verifiedToken.userIdx;
 
-    if (userIdx != userIdxFromJWT) {
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
-    }
+    } 
 
     const isAd = checkArticleIdx[0].isAd;
 
@@ -303,15 +309,16 @@ exports.patchArticleStatus = async function(req, res) {
         return res.send(response(baseResponse.ARTICLE_ARTICLE_NOT_EXIST));
     }
     const userIdx = userIdxResult[0].userIdx;
-    const userIdxFromJWT = req.verifiedToken.userIdx;
 
     if (!articleIdx) {
         return res.send(response(baseResponse.ARTICLE_ARTICLEIDX_EMPTY));
     }
 
-    if (userIdx != userIdxFromJWT) {
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
-    }
+    } 
 
     if (!status) {
         return res.send(response(baseResponse.ARTICLE_STATUS_EMPTY));

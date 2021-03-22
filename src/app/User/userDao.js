@@ -1,7 +1,7 @@
 // 전화번호로 회원 조회
 async function selectUserPhoneNumber(connection, phoneNumber) {
     const selectUserPhoneNumberQuery = `
-                SELECT nickName, phoneNumber
+                SELECT nickName, phoneNumber, idx
                 FROM User
                 WHERE phoneNumber = ?;
                 `;
@@ -99,7 +99,7 @@ async function selectUserProfile(connection, userIdx) {
                         else sellProduct
                     end as sellCount
                 FROM User
-                left join (select userIdx, Count(userIdx) as 'sellProduct' from Article where Article.status != 'DELETED' and Article.hide != 'Y' group by userIdx) s on s.userIdx = User.idx
+                left join (select userIdx, Count(userIdx) as 'sellProduct' from Article where Article.status = 'SALE' and Article.hide != 'Y' group by userIdx) s on s.userIdx = User.idx
                 WHERE User.idx = ?;
                 `;
     const [userProfileRow] = await connection.query(selectUserProfileQuery, userIdx);
@@ -241,6 +241,37 @@ async function updateTownAuth (connection, userIdx) {
     return updateTownAuthRow;
 };
 
+async function insertToken(connection, userIdx, token) {
+    const insertTokenQuery = `
+                INSERT INTO Token(userIdx, jwt)
+                VALUES(${userIdx}, '${token}');
+                `;
+    const insertTokenRow = await connection.query(insertTokenQuery, userIdx, token);
+
+    return insertTokenRow;
+};
+
+async function selectJWT(connection, userIdx) {
+    const selectJWTQuery = `
+                SELECT jwt, userIdx
+                FROM Token
+                WHERE userIdx = ?;
+                `;
+    const [selectJWTRow] = await connection.query(selectJWTQuery, userIdx);
+
+    return selectJWTRow;
+};
+
+async function deleteJWT(connection, userIdx) {
+    const deleteJWTQuery = `
+                DELETE FROM Token
+                WHERE userIdx = ?;
+                `;
+    const deleteJWTRow = await connection.query(deleteJWTQuery, userIdx);
+
+    return deleteJWTRow;
+};
+
 module.exports = {
     insertUser,
     selectUserPhoneNumber,
@@ -256,5 +287,8 @@ module.exports = {
     insertLike,
     selectLikesByUserIdx,
     selectUserByLocation,
-    updateTownAuth
+    updateTownAuth,
+    insertToken,
+    selectJWT,
+    deleteJWT
 };

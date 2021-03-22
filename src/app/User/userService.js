@@ -22,7 +22,6 @@ exports.createUser = async function (nickName, phoneNumber, profileImgUrl, town,
         if (phoneNumberRows.length > 0) {
             return errResponse(baseResponse.SIGNUP_REDUNDANT_PHONENUMBER);
         }
-
         // TODO
         // contryIdx 존재 여부 확인
 
@@ -57,6 +56,11 @@ exports.postSignIn = async function(phoneNumber) {
             return errResponse(baseResponse.SIGNIN_WITHDRAWAL_ACCOUNT);
         }
 
+        const checkJWT = await userProvider.checkJWT(phoneNumberRows[0].idx);
+        if (checkJWT.length > 0) {
+            return errResponse(baseResponse.ALREADY_LOGIN);
+        }
+
         let token = await jwt.sign(
             {
                 userIdx: userAccountRows[0].idx,
@@ -67,6 +71,10 @@ exports.postSignIn = async function(phoneNumber) {
                 subject: "userInfo",
             }
         );
+
+        const connection = await pool.getConnection(async (conn) => conn);
+        const tokenResult = await userDao.insertToken(connection, userAccountRows[0].idx, token);
+        connection.release();
 
         return response(baseResponse.SUCCESS, {'userIdx': userAccountRows[0].idx, 'jwt': token});
     } catch(err) {
@@ -167,3 +175,16 @@ exports.patchTownAuth = async function(userIdx, currentLatitude, currentLongitud
         return errResponse(baseResponse.DB_ERROR);
     }
 };
+
+exports.deleteJWT = async function(userIdx) {
+    try {
+        const connection = await pool.getConnection(async(conn) => conn);
+        const deleteJWTResult = await userDao.deleteJWT(connection, userIdx);
+        connection.release();
+
+        return response(baseResponse.SUCCESS);
+    } catch (err) {
+        logger.error(`App - deleteJWT Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    }
+}

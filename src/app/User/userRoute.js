@@ -47,4 +47,7 @@ module.exports = function(app){
 
     // 25. 동네 인증 API
     app.patch('/app/auth/users/:userIdx/town', jwtMiddleware, user.patchTownAuth);
+
+    // 27. 로그아웃 API
+    app.get('/app/logout', jwtMiddleware, user.logOut);
 };

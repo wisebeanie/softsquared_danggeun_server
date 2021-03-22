@@ -14,7 +14,6 @@ exports.postComments = async function (req, res) {
     /*
         Body : articleIdx, userIdx, parentCommentIdx, content
     */
-    const userIdxFromJWT = req.verifiedToken.userIdx;
     var { articleIdx, userIdx, parentCommentIdx, content } = req.body;
 
     if (!articleIdx) {
@@ -25,12 +24,11 @@ exports.postComments = async function (req, res) {
         return res.send(response(baseResponse.COMMENT_CONTENT_EMPTY));
     }
 
-    if (userIdx != userIdxFromJWT) {
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
-    }
-    if (content.length > 100) {
-        return res.send(response(baseResponse.COMMENT_CONTENT_LENGTH));
-    }
+    } 
 
     if (!parentCommentIdx) {
         parentCommentIdx = 0;
@@ -49,7 +47,6 @@ exports.postComments = async function (req, res) {
 exports.patchComment = async function(req, res) {
     // Path Variable : commentIdx
     const commentIdx = req.params.commentIdx;
-    const userIdxFromJWT = req.verifiedToken.userIdx;
 
     if (!commentIdx) {
         return res.send(response(baseResponse.COMMENT_COMMENTIDX_EMPTY));
@@ -63,9 +60,11 @@ exports.patchComment = async function(req, res) {
 
     const userIdx = commentByIdx[0].userIdx;
 
-    if (userIdx != userIdxFromJWT) {
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
-    }
+    } 
 
     const editComment = await commentService.editComment(commentIdx);
     return res.send(editComment);
