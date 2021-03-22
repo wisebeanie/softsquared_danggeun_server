@@ -99,6 +99,9 @@ module.exports = {
    
     ARTICLE_HIDE_OR_NOT_EMPTY : { "isSuccess": false, "code": 2064, "message": "hideOrNot을 입력해주세요" },
 
+    AUTH_LATITUDE_EMPTY : { "isSuccess": false, "code": 2065, "message": "현재 위도를 입력해주세요." },
+    AUTH_LONGITUDE_EMPTY : { "isSuccess": false, "code": 2066, "message": "현재 경도를 입력해주세요." },
+
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},
@@ -127,6 +130,8 @@ module.exports = {
 
     USER_USER_NOT_EXIST : { "isSuccess": false, "code": 3018, "message": "해당 유저는 존재하지 않습니다." },
 
+    AUTH_TOWN_FAIL : { "isSuccess": false, "code": 3019, "message": "동네 인증에 실패했습니다." },
+    
 
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},

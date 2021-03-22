@@ -44,4 +44,7 @@ module.exports = function(app){
 
     // 24. 관심 목록 조회 API (글 종류에 따라)
     app.get('/app/users/:userIdx/likes', jwtMiddleware, user.getUserLikes);
+
+    // 25. 동네 인증 API
+    app.patch('/app/auth/users/:userIdx/town', jwtMiddleware, user.patchTownAuth);
 };

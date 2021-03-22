@@ -569,3 +569,39 @@ exports.getUserLikes = async function(req, res) {
 
     return res.send(likesListResult);
 };
+
+/*
+    API No. 25
+    API Name : 동네 인증 API
+    [POST] /app/auth/users/{userIdx}/town
+*/
+exports.patchTownAuth = async function(req, res) {
+    // Path Variable : userIdx
+    const userIdx = req.params.userIdx;
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    /*
+        Body : currentLatitude, currentLongitude
+    */
+    const {currentLatitude, currentLongitude} = req.body;
+
+    if (!userIdx) {
+        return res.send(response(baseResponse.ARTICLE_USERIDX_EMPTY));
+    } else if (userIdx != userIdxFromJWT) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
+
+    if (!currentLatitude) {
+        return res.send(response(baseResponse.AUTH_LATITUDE_EMPTY));
+    } else if (!currentLongitude) {
+        return res.send(response(baseResponse.AUTH_LONGITUDE_EMPTY));
+    }
+
+    // 유저에 저장된 동네 위경도 값
+    const userLatitude = await userProvider.retrieveLatitude(userIdx);
+    const userLongitude = await userProvider.retrieveLongitude(userIdx);
+
+    const patchTownAuthResponse = await userService.patchTownAuth(userIdx, currentLatitude, currentLongitude, userLatitude.latitude, userLongitude.longitude);
+
+    return res.send(patchTownAuthResponse);
+};

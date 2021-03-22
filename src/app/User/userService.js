@@ -35,7 +35,6 @@ exports.createUser = async function (nickName, phoneNumber, profileImgUrl, town,
         return response(baseResponse.SUCCESS, {"added User": userIdResult[0].insertId});
     } catch (err) {
         logger.error(`App - createUser Service error\n: ${err.message}`);
-        connection.release();
         return errResponse(baseResponse.DB_ERROR);
     }
 };
@@ -72,7 +71,6 @@ exports.postSignIn = async function(phoneNumber) {
         return response(baseResponse.SUCCESS, {'userIdx': userAccountRows[0].idx, 'jwt': token});
     } catch(err) {
         logger.error(`App - postSignIn Service error\n: ${err.message}`);
-        connection.release();
         return errResponse(baseResponse.DB_ERROR);
     }
 };
@@ -92,7 +90,6 @@ exports.editProfile = async function(userIdx, profileImgUrl, nickName) {
         return response(baseResponse.SUCCESS);
     } catch (err) {
         logger.error(`App - editProfile Service error\n: ${err.message}`);
-        connection.release();
         return errResponse(baseResponse.DB_ERROR);
     }
 };
@@ -141,6 +138,32 @@ exports.insertLike = async function(articleIdx, userIdx) {
         return response(baseResponse.SUCCESS, "좋아요가 활성되었습니다.");
     } catch (err) {
         logger.error(`App - insertLike Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};
+
+exports.patchTownAuth = async function(userIdx, currentLatitude, currentLongitude, userLatitude, userLongitude) {
+    const connection = await pool.getConnection(async(conn) => conn);
+    try {
+        await connection.beginTransaction();
+        const authTownResult = await userDao.selectUserByLocation(connection, userIdx, currentLatitude, currentLongitude, userLatitude, userLongitude);
+        // 동네 인증 실패
+        if (authTownResult.length < 1) {
+            await connection.rollback();
+            connection.release();
+            return errResponse(baseResponse.AUTH_TOWN_FAIL);
+        } else {
+            // 동네 인증 성공
+            const updateTownAuthResult = await userDao.updateTownAuth(connection, userIdx);
+            await connection.commit();
+            connection.release();
+
+            return response(baseResponse.SUCCESS, "동네인증 성공");
+        }
+    } catch(err) {
+        logger.error(`App - patchTownAuth Service error\n: ${err.message}`);
+        await connection.rollback();
+        connection.release();
         return errResponse(baseResponse.DB_ERROR);
     }
 };

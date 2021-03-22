@@ -89,9 +89,9 @@ async function selectUserProfile(connection, userIdx) {
                     manner,
                     town,
                     case
-                    when isCertified = 0
+                    when townAuth = 0
                         then '미인증'
-                    else isCertified
+                    else townAuth
                     end as 'townCertification',
                     date_format(createdAt, '%Y년 %c월 %d일 가입') as 'createdAt',
                     case when sellProduct is null
@@ -212,7 +212,34 @@ async function selectLikesByUserIdx(connection, userIdx, isAd) {
     const [likeByUserIdxRow] = await connection.query(selectLikesByUserIdxQuery, userIdx, isAd);
 
     return likeByUserIdxRow;
-}
+};
+
+async function selectUserByLocation (connection, userIdx, currentLatitude, currentLongitude, userLatitude, userLongitude) {
+    const selectUserByLocationQuery = `
+                SELECT idx,
+                (6371*acos(cos(radians(${userLatitude}))*cos(radians(${currentLatitude}))*cos(radians(${currentLongitude})
+                -radians(${userLongitude}))+sin(radians(${userLatitude}))*sin(radians(${currentLatitude})))) as distance
+                FROM User
+                WHERE idx = ${userIdx}
+                HAVING distance <= 0.3
+                ORDER BY distance 
+                LIMIT 0,300;
+                `;
+    const [userLocationRow] = await connection.query(selectUserByLocationQuery, userIdx, currentLatitude, currentLongitude, userLatitude, userLongitude);
+
+    return userLocationRow;
+};
+
+async function updateTownAuth (connection, userIdx) {
+    const updateTownAuthQuery = `
+                UPDATE User
+                SET townAuth = townAuth + 1
+                WHERE idx = ?;
+                `;
+    const updateTownAuthRow = await connection.query(updateTownAuthQuery, userIdx);
+
+    return updateTownAuthRow;
+};
 
 module.exports = {
     insertUser,
@@ -227,5 +254,7 @@ module.exports = {
     selectLikes,
     updateLikes,
     insertLike,
-    selectLikesByUserIdx
+    selectLikesByUserIdx,
+    selectUserByLocation,
+    updateTownAuth
 };
