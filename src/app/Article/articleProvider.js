@@ -30,11 +30,11 @@ exports.retrieveLocalAdCategoryList = async function() {
     return categoryListResult;
 };
 
-exports.retrieveArticleList = async function(latitude, longitude, categoryList) {
+exports.retrieveArticleList = async function(latitude, longitude, categoryList, page) {
     const connection = await pool.getConnection(async (conn) => conn);
 
     // 판매 글 조회
-    const articleListResult = await articleDao.selectArticles(connection, latitude, longitude, categoryList);
+    const articleListResult = await articleDao.selectArticles(connection, latitude, longitude, categoryList, page);
     for (article of articleListResult) {
         const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
         const img = articleImgResult[0];

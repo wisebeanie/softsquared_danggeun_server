@@ -137,10 +137,14 @@ exports.getCategories = async function(req, res) {
 /*
     API No. 12
     API Name : 글 전체 조회 글 종류에 따라
-    [GET] /app/articles?categoryIdx=
+    [GET] /app/articles?page=&categoryIdx=
 */
 exports.getArticles = async function(req, res) {
-    // Query String = isAd
+    // Query String = page, categoryIdx
+    var page = req.query.page;
+    if (!page) {
+        page = 1;
+    }
     const categoryList = req.query.categoryIdx;
 
     const userIdxFromJWT = req.verifiedToken.userIdx;
@@ -164,7 +168,7 @@ exports.getArticles = async function(req, res) {
     const longitude = await userProvider.retrieveLongitude(checkJWT[0].userIdx);
 
     // 판매 글 조회
-    const articleListResult = await articleProvider.retrieveArticleList(latitude.latitude, longitude.longitude, categoryList);
+    const articleListResult = await articleProvider.retrieveArticleList(latitude.latitude, longitude.longitude, categoryList, page);
     return res.send(response(baseResponse.SUCCESS, articleListResult));
     
 };

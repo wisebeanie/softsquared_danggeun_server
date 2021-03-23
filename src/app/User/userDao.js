@@ -163,8 +163,10 @@ async function selectLikesByUserIdx(connection, userIdx, isAd) {
                         else null
                     end as town, 
                     title,
-                    case when price = 0
-                        then '무료나눔'
+                    case when price = 0 and isAd = 'N'
+                            then '무료나눔'
+                        when isAd = 'Y' and price = 0
+                            then '가격없음'
                         else price
                     end as price,
                     case

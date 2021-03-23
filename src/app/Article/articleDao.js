@@ -67,7 +67,7 @@ async function selectLocalAdCategory (connection) {
     return selectLocalAdCategoryRows;
 };
 
-async function selectArticles (connection, latitude, longitude, categoryList) {
+async function selectArticles (connection, latitude, longitude, categoryList, page) {
     var selectArticlesQuery = `
                 SELECT Article.idx,
                     case when isAd = 'N'
@@ -75,8 +75,10 @@ async function selectArticles (connection, latitude, longitude, categoryList) {
                         else '동네홍보'
                     end as isAd,
                     title,
-                    case when price = 0
-                        then '무료나눔'
+                    case when price = 0 and isAd = 'N'
+                            then '무료나눔'
+                        when isAd = 'Y' and price = 0
+                            then null
                         else price
                     end as price,
                     case when isAd = 'N'
@@ -152,9 +154,10 @@ async function selectArticles (connection, latitude, longitude, categoryList) {
         }  
     } 
     selectArticlesQuery += ` group by Article.idx
-    ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC;`;
+    ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC
+    LIMIT ${5 * page - 5}, 5;`;
 
-    const [selectArticleRows] = await connection.query(selectArticlesQuery, latitude, longitude, categoryList);
+    const [selectArticleRows] = await connection.query(selectArticlesQuery, latitude, longitude, categoryList, page);
 
     return selectArticleRows;
 };
@@ -299,7 +302,10 @@ async function selectLocalAdIdx(connection, articleIdx, userIdx) {
                             then 'liked'
                         else 'no liked'
                         end as 'likedOrNot',
-                    price,
+                    case when price = 0
+                        then '가격없음'
+                    else price
+                end as price,
                     noChat,
                     Article.status
                 from Article
@@ -399,8 +405,10 @@ async function selectArticleByStatus(connection, userIdx, status) {
                         else '동네홍보'
                     end as isAd,    
                     title,
-                    case when price = 0
-                        then '무료나눔'
+                    case when price = 0 and isAd = 'N'
+                            then '무료나눔'
+                        when isAd = 'Y' and price = 0
+                            then null
                         else price
                     end as price,
                     User.town,
@@ -460,7 +468,8 @@ async function selectArticleByStatus(connection, userIdx, status) {
                     left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
                 WHERE Article.status = '${status}' and Article.userIdx = '${userIdx}' and hide != 'Y'
                 group by Article.idx
-                ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC;
+                ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC
+                LIMIT ${5 * page - 5}, 5;
                 `;
     const [articleBystatusRow] = await connection.query(selectArticleByStatusQuery, userIdx, status);
 
@@ -479,8 +488,10 @@ async function selectHideArticles(connection, userIdx) {
                         else null
                     end as town, 
                     title,
-                    case when price = 0
-                        then '무료나눔'
+                    case when price = 0 and isAd = 'N'
+                            then '무료나눔'
+                        when isAd = 'Y' and price = 0
+                            then null
                         else price
                     end as price,
                     User.town,
@@ -555,8 +566,10 @@ async function selectSalesUserIdx(connection, userIdx) {
                         else null
                     end as town, 
                     title,
-                    case when price = 0
-                        then '무료나눔'
+                    case when price = 0 and isAd = 'N'
+                            then '무료나눔'
+                        when isAd = 'Y' and price = 0
+                            then null
                         else price
                     end as price,
                     User.town,
