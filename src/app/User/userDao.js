@@ -154,12 +154,19 @@ async function insertLike(connection, insertLikeParams) {
 async function selectLikesByUserIdx(connection, userIdx, isAd) {
     const selectLikesByUserIdxQuery = `
                 SELECT Article.idx, 
+                case when isAd = 'N'
+                            then '중고거래'
+                        else '동네홍보'
+                    end as isAd,
+                    case when isAd = 'N'
+                            then User.town
+                        else null
+                    end as town, 
                     title,
                     case when price = 0
                         then '무료나눔'
                         else price
                     end as price,
-                    User.town,
                     case
                         when pullUpStatus = 'N'
                             then 'N'
@@ -194,6 +201,10 @@ async function selectLikesByUserIdx(connection, userIdx, isAd) {
                         then 0
                         else chat
                         end as chatCount,
+                    case when comments is null
+                            then 0
+                        else comments
+                    end as commentCount,
                     case when Article.status = 'SOLD'
                         then '거래완료'
                         when Article.status = 'RESERVED'
@@ -205,9 +216,11 @@ async function selectLikesByUserIdx(connection, userIdx, isAd) {
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                    join (select articleIdx, status from LikedArticle where userIdx = ${userIdx}) liked on liked.articleIdx = Article.idx
-                WHERE isAd = '${isAd}' and hide != 'Y' and Article.status != 'DELETED' and liked.status = 'ACTIVE'
-                group by Article.idx;
+                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                    join (select articleIdx, status, updatedAt from LikedArticle where userIdx = ${userIdx}) liked on liked.articleIdx = Article.idx
+                WHERE hide != 'Y' and Article.status != 'DELETED' and liked.status = 'ACTIVE'
+                group by Article.idx
+                ORDER BY liked.updatedAt DESC;
                 `;
     const [likeByUserIdxRow] = await connection.query(selectLikesByUserIdxQuery, userIdx, isAd);
 

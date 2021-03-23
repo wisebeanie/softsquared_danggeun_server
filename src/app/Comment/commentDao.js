@@ -53,7 +53,7 @@ async function selectComments(connection, articleIdx) {
                     join User on User.idx = Comment.userIdx
                     join Article on Article.idx = Comment.articleIdx
                 WHERE articleIdx = ? and parentCommentIdx = 0 and Comment.status = 'ACTIVE'
-                ORDER BY timestampdiff(second, Comment.updatedAt, current_timestamp);
+                ORDER BY Comment.createdAt;
                 `;
     const [commentsRow] = await connection.query(selectCommentsQuery, articleIdx);
 
@@ -94,7 +94,7 @@ async function selectNestedComments(connection, parentCommentIdx) {
                     join User on User.idx = Comment.userIdx
                     join Article on Article.idx = Comment.articleIdx
                 WHERE parentCommentIdx = ?
-                ORDER BY timestampdiff(second, Comment.updatedAt, current_timestamp);
+                ORDER BY Comment.createdAt;
                 `;
     const [nestedCommentsRow] = await connection.query(selectNestedCommentsQuery, parentCommentIdx);
 

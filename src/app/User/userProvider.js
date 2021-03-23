@@ -74,9 +74,9 @@ exports.retrieveLikes = async function(articleIdx, userIdx) {
     return likeResult;
 };
 
-exports.retrieveLikesByUserIdx = async function(userIdx, isAd) {
+exports.retrieveLikesByUserIdx = async function(userIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
-    const likesList = await userDao.selectLikesByUserIdx(connection, userIdx, isAd);
+    const likesList = await userDao.selectLikesByUserIdx(connection, userIdx);
     for (article of likesList) {
         const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
         const img = articleImgResult[0];

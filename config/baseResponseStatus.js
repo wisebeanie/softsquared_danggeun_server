@@ -105,7 +105,7 @@ module.exports = {
     AUTH_INPUT_WRONG : { "isSuccess": false, "code": 2067, "message": "address와 currentLatitude, currentLongitude는 같이 입력할 수 없습니다." },
 
     MODIFY_ACCOUNT_WRONG : { "isSuccess": false, "code": 2068, "message": "phoneNumber나 email 둘중 하나는 반드시 입력되어야합니다." },
-    CANT_MODIFY_BOTH : { "isSuccess": false, "code": 2069, "message": "둘 중 하나만 입력해주세요" },
+    CANT_MODIFY_BOTH : { "isSuccess": false, "code": 2069, "message": "phoneNumber와 email 둘 중 하나만 입력해주세요" },
 
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },

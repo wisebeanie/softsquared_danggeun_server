@@ -11,7 +11,7 @@ module.exports = function(app) {
     // 11. 카테고리 조회 API
     app.get('/app/articles/categories', article.getCategories);
     
-    // 12. 글 전체 조회 API (글 종류에 따라)
+    // 12. 글 전체 조회 API
     app.get('/app/articles', jwtMiddleware, article.getArticles);
 
     // 13. 글 상세페이지 조회 API
@@ -25,4 +25,7 @@ module.exports = function(app) {
 
     // 22. 글 상태 수정 API
     app.patch('/app/articles/:articleIdx/status', jwtMiddleware, article.patchArticleStatus);
+
+    // 26. 검색 API
+    // app.get('/app/articles/search', article.getSearch);
 }

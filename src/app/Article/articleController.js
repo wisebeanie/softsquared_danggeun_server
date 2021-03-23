@@ -137,44 +137,36 @@ exports.getCategories = async function(req, res) {
 /*
     API No. 12
     API Name : 글 전체 조회 글 종류에 따라
-    [GET] /app/articles?isAd=&categoryIdx=
+    [GET] /app/articles?categoryIdx=
 */
 exports.getArticles = async function(req, res) {
     // Query String = isAd
-    var isAd = req.query.isAd;
-    var categoryList = req.query.categoryIdx;
+    const categoryList = req.query.categoryIdx;
 
-    // 현재 로그인 된 유저
     const userIdxFromJWT = req.verifiedToken.userIdx;
-    
-    if (!isAd) {
-        isAd = "N";
+    // 현재 로그인 된 유저
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdxFromJWT);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
     }
-    if (!categoryList) {
-        return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_EMPTY));
-    } else if (isAd == "Y" && categoryList) {
-        return res.send(response(baseResponse.LOCALAD_CANT_CATEGORY_SEARCH));
-    } 
 
-    for (categoryIdx of categoryList) {
-        if (categoryIdx > 15 || categoryIdx < 1) {
-            return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_WRONG));
+    if (categoryList) {
+        for (categoryIdx of categoryList) {
+            if (categoryIdx > 15 || categoryIdx < 1) {
+                return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_WRONG));
+            }
         }
     }
 
     // 로그인 된 유저의 위경도
-    const latitude = await userProvider.retrieveLatitude(userIdxFromJWT);
-    const longitude = await userProvider.retrieveLongitude(userIdxFromJWT);
+    const latitude = await userProvider.retrieveLatitude(checkJWT[0].userIdx);
+    const longitude = await userProvider.retrieveLongitude(checkJWT[0].userIdx);
 
-    if (isAd == "N") {
-        // 판매 글 조회
-        const articleListResult = await articleProvider.retrieveArticleList(latitude.latitude, longitude.longitude, categoryList);
-        return res.send(response(baseResponse.SUCCESS, articleListResult));
-    } else {
-        // 지역광고 글 조회
-        const localAdListResult = await articleProvider.retrieveLocalAdList(latitude.latitude, longitude.longitude, categoryList);
-        return res.send(response(baseResponse.SUCCESS, localAdListResult));
-    }   
+    // 판매 글 조회
+    const articleListResult = await articleProvider.retrieveArticleList(latitude.latitude, longitude.longitude, categoryList);
+    return res.send(response(baseResponse.SUCCESS, articleListResult));
+    
 };
 
 /*
@@ -186,6 +178,12 @@ exports.getArticleByIdx = async function (req, res) {
     // Path Variable : articleIdx
     const articleIdx = req.params.articleIdx;
     const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdxFromJWT);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
 
     if (!articleIdx) {
         return res.send(response(baseResponse.ARTICLE_ARTICLEIDX_EMPTY));
@@ -334,3 +332,12 @@ exports.patchArticleStatus = async function(req, res) {
         return res.send(response(baseResponse.ARTICLE_EDIT_STATUS_WRONG));
     }
 };
+
+/*
+    API No. 26
+    API Name : 검색 API
+    [GET] /app/articles/search
+*/
+// exports.getSearch = async function(req, res) {
+
+// }

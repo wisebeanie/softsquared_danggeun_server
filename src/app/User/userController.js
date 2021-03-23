@@ -555,15 +555,13 @@ exports.postLikes = async function(req, res) {
 
 /*
     API No. 24
-    API Name : 관심 목록 조회 API (글 종류에 따라)
-    [GET] /app/users/{userIdx}/likes?isAd=
+    API Name : 관심 목록 조회 API 
+    [GET] /app/users/{userIdx}/likes
 */
 exports.getUserLikes = async function(req, res) {
     // Path Variable : userIdx
     const userIdx = req.params.userIdx;
 
-    // Query String : isAd
-    const isAd = req.query.isAd;
 
     if (!userIdx) {
         return res.send(response(baseResponse.USER_USERIDX_EMPTY));
@@ -574,11 +572,7 @@ exports.getUserLikes = async function(req, res) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
     } 
 
-    if (!isAd) {
-        return res.send(response(baseResponse.ARTICLE_ISAD_EMPTY));
-    }
-
-    const likesListResult = await userProvider.retrieveLikesByUserIdx(userIdx, isAd);
+    const likesListResult = await userProvider.retrieveLikesByUserIdx(userIdx);
 
     return res.send(likesListResult);
 };
