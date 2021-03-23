@@ -646,6 +646,10 @@ exports.withDrawUser = async function(req, res) {
     // Path Varialble : userIdx
     const userIdx = req.params.userIdx;
 
+    if (!userIdx) {
+        return res.send(response(baseResponse.ARTICLE_USERIDX_EMPTY));
+    } 
+
     const token = req.headers['x-access-token'];
     const checkJWT = await userProvider.checkJWT(userIdx);
     if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
@@ -665,6 +669,10 @@ exports.withDrawUser = async function(req, res) {
 exports.patchAccount = async function(req, res) {
     // Path Variable : userIdx
     const userIdx = req.params.userIdx;
+
+    if (!userIdx) {
+        return res.send(response(baseResponse.ARTICLE_USERIDX_EMPTY));
+    } 
 
     const token = req.headers['x-access-token'];
     const checkJWT = await userProvider.checkJWT(userIdx);
@@ -706,6 +714,10 @@ exports.postFollow = async function(req, res) {
     // Path Variable : userIdx
     const userIdx = req.params.userIdx;
 
+    if (!userIdx) {
+        return res.send(response(baseResponse.ARTICLE_USERIDX_EMPTY));
+    } 
+
     /*
         Body : followUserIdx
     */
@@ -718,10 +730,10 @@ exports.postFollow = async function(req, res) {
     }
 
     if (!followUserIdx) {
-        return res.send(response(baseResponse.USER_USERIDX_EMPTY));
+        return res.send(response(baseResponse.USER_FOLLOWUSER_EMPTY));
     }
 
-    const followUserResult = await userProvider.retrieveFollow(userIdx);
+    const followUserResult = await userProvider.retrieveFollow(userIdx, followUserIdx);
 
     if (followUserResult.length > 0) {
         // 이미 팔로일한 유저
@@ -739,4 +751,28 @@ exports.postFollow = async function(req, res) {
         const followResponse = await userService.followUser(userIdx, followUserIdx);
         return res.send(followResponse);
     }
+};
+
+/*
+    API No. 31
+    API Name : 필로잉 유저 조회 API
+    [GET] /app/users/{userIdx}/following
+*/
+exports.getFollow = async function(req, res) {
+    // Path Variable : userIdx;
+    const userIdx = req.params.userIdx;
+
+    if (!userIdx) {
+        return res.send(response(baseResponse.ARTICLE_USERIDX_EMPTY));
+    } 
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
+
+    const followResult = await userProvider.retrieveFollowUsers(userIdx);
+    
+    return res.send(response(baseResponse.SUCCESS, followResult));
 };

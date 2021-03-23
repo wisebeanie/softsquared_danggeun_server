@@ -322,11 +322,11 @@ async function updateUserEmail(connection, updateParams) {
     return updateAccountRow;
 };
 
-async function selectFollow(connection, userIdx) {
+async function selectFollow(connection, userIdx, followUserIdx) {
     const selectFollowQuery = `
                 SELECT status, followUserIdx
                 FROM Following
-                WHERE userIdx = ?;
+                WHERE userIdx = ${userIdx} and ${followUserIdx};
                 `;
     const [selectFollowRow] = await connection.query(selectFollowQuery, userIdx);
 
@@ -354,6 +354,21 @@ async function insertFollow(connection, userIdx, followUserIdx) {
     return insertFollowRow;
 };
 
+async function selectFollowUsers(connection, userIdx) {
+    const selectFollowUsersQuery = `
+                SELECT nickName,
+                    town,
+                    profileImgUrl,
+                    Following.status
+                FROM Following
+                    join User on User.idx = Following.followUserIdx
+                WHERE userIdx = ? and Following.status = 'ACTIVE';
+                `;
+    const [selectFollowUsersRow] = await connection.query(selectFollowUsersQuery, userIdx);
+
+    return selectFollowUsersRow;
+};
+
 module.exports = {
     insertUser,
     selectUserPhoneNumber,
@@ -378,5 +393,6 @@ module.exports = {
     updateUserEmail,
     selectFollow,
     updateFollow,
-    insertFollow
+    insertFollow,
+    selectFollowUsers
 };

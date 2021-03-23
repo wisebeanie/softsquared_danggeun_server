@@ -108,6 +108,7 @@ module.exports = {
     CANT_MODIFY_BOTH : { "isSuccess": false, "code": 2069, "message": "phoneNumber와 email 둘 중 하나만 입력해주세요" },
 
     SEARCH_SEARCHQUERY_EMPTY : { "isSuccess": false, "code": 2070, "message": "검색어를 입력해주세요" },
+    USER_FOLLOWUSER_EMPTY : { "isSuccess": false, "code": 2071, "message": "followUserIdx를 입력해주세요." },
 
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },

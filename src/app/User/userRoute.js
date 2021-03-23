@@ -52,11 +52,14 @@ module.exports = function(app){
     app.get('/app/logout', jwtMiddleware, user.logOut);
 
     // 28. 탈퇴하기 API
-    app.patch('/app/users/:userIdx/withdraw', user.withDrawUser);
+    app.patch('/app/users/:userIdx/withdraw', jwtMiddleware, user.withDrawUser);
 
     // 29. 특정 유저 계정/정보 수정
     app.patch('/app/users/:userIdx/accounts', jwtMiddleware, user.patchAccount);
 
     // 30. 유저 팔로잉 API
     app.post('/app/users/:userIdx/following', jwtMiddleware, user.postFollow);
+
+    // 31. 팔로잉 유저 조회 API
+    app.get('/app/users/:userIdx/following', jwtMiddleware, user.getFollow);
 };

@@ -95,9 +95,17 @@ exports.checkJWT = async function(userIdx) {
     return checkJWTResult;
 };
 
-exports.retrieveFollow = async function(userIdx) {
+exports.retrieveFollow = async function(userIdx, followUserIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
-    const followResult = await userDao.selectFollow(connection, userIdx);
+    const followResult = await userDao.selectFollow(connection, userIdx, followUserIdx);
+    connection.release();
+
+    return followResult;
+};
+
+exports.retrieveFollowUsers = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const followResult = await userDao.selectFollowUsers(connection, userIdx);
     connection.release();
 
     return followResult;
