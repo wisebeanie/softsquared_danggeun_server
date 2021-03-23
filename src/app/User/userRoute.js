@@ -53,4 +53,7 @@ module.exports = function(app){
 
     // 28. 탈퇴하기 API
     app.patch('/app/users/:userIdx/withdraw', user.withDrawUser);
+
+    // 29. 특정 유저 계정/정보 수정
+    app.patch('/app/users/:userIdx/accounts', jwtMiddleware, user.patchAccount);
 };

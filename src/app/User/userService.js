@@ -205,4 +205,31 @@ exports.withDrawUser = async function(userIdx) {
         connection.release();
         return errResponse(baseResponse.DB_ERROR);
     }
-}
+};
+
+exports.updateUserAccount = async function(userIdx, phoneNumber, email) {
+    try {
+        // 전화번호 중복 확인
+        if (phoneNumber) {
+            const phoneNumberRows = await userProvider.phoneNumberCheck(phoneNumber);
+            if (phoneNumberRows.length > 0) {
+                return errResponse(baseResponse.SIGNUP_REDUNDANT_PHONENUMBER);
+            }
+        }
+
+        const connection = await pool.getConnection(async (conn) => conn);
+        if (phoneNumber) {
+            const updateParams = [phoneNumber, userIdx];
+            const updateUserAccountResult = await userDao.updateUserPhoneNumber(connection, updateParams);
+        } else {
+            const updateParams = [email, userIdx];
+            const updateUserAccountResult = await userDao.updateUserEmail(connection, updateParams);
+        }
+        connection.release();
+
+        return response(baseResponse.SUCCESS);
+    } catch (err) {
+        logger.error(`App - updateUserAccount Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};

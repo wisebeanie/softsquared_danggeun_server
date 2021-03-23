@@ -283,6 +283,30 @@ async function withDrawUser(connection, userIdx) {
     return withDrawUserRow;
 };
 
+async function updateUserPhoneNumber(connection, updateParams) {
+    const updateUserAccountQuery = `
+                UPDATE User
+                SET phoneNumber = ?
+                WHERE idx = ?;
+                `;
+
+    const updateAccountRow = await connection.query(updateUserAccountQuery, updateParams);
+
+    return updateAccountRow;
+};
+
+async function updateUserEmail(connection, updateParams) {
+    const updateUserAccountQuery = `
+                UPDATE User
+                SET email = ?
+                WHERE idx = ?;
+                `;
+
+    const updateAccountRow = await connection.query(updateUserAccountQuery, updateParams);
+
+    return updateAccountRow;
+};
+
 module.exports = {
     insertUser,
     selectUserPhoneNumber,
@@ -302,5 +326,7 @@ module.exports = {
     insertToken,
     selectJWT,
     deleteJWT,
-    withDrawUser
+    withDrawUser,
+    updateUserPhoneNumber,
+    updateUserEmail
 };

@@ -662,3 +662,43 @@ exports.withDrawUser = async function(req, res) {
 
     return res.send(withDrawUserResponse);
 };
+
+/*
+    API No. 29
+    API Name : 특정 유저 계정/정보 수정
+    [PATCH] /app/users/:userIdx/accounts
+*/
+exports.patchAccount = async function(req, res) {
+    // Path Variable : userIdx
+    const userIdx = req.params.userIdx;
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
+
+    /*
+        Body : phoneNumber, email
+    */
+    const { phoneNumber, email } = req.body;
+
+    if (!phoneNumber && !email) {
+        return res.send(response(baseResponse.MODIFY_ACCOUNT_WRONG));
+    }
+    if (phoneNumber && !regPhoneNumber.test(phoneNumber)) {
+        return res.send(response(baseResponse.AUTH_PHONENUMBER_ERROR_TYPE));
+    } else if (email && !regexEmail.test(email)) {
+        return res.send(response(baseResponse.AUTH_EMAIL_ERROR_TYPE));
+    } else if (phoneNumber && email) {
+        return res.send(baseResponse.CANT_MODIFY_BOTH);
+    }
+
+    if (email  && email.length > 30) {
+        return res.send(response(baseResponse.AUTH_EMAIL_LENGTH));
+    }
+
+    const patchAccountResponse = await userService.updateUserAccount(userIdx, phoneNumber, email);
+
+    return res.send(patchAccountResponse);
+};
