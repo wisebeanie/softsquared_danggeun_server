@@ -415,7 +415,7 @@ exports.getUserByIdx = async function(req, res) {
     } 
     const userIdxResult = await userProvider.retrieveUserByIdx(userIdx);
 
-    return res.send(userIdxResult);
+    return res.send(response(baseResponse.SUCCESS, userIdxResult[0]));
 };
 
 /*
@@ -695,4 +695,48 @@ exports.patchAccount = async function(req, res) {
     const patchAccountResponse = await userService.updateUserAccount(userIdx, phoneNumber, email);
 
     return res.send(patchAccountResponse);
+};
+
+/*
+    API No. 30
+    API Name : 관심 등록 API
+    [POST] /app/users/{userIdx}/following
+*/
+exports.postFollow = async function(req, res) {
+    // Path Variable : userIdx
+    const userIdx = req.params.userIdx;
+
+    /*
+        Body : followUserIdx
+    */
+    const { followUserIdx } = req.body;
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
+
+    if (!followUserIdx) {
+        return res.send(response(baseResponse.USER_USERIDX_EMPTY));
+    }
+
+    const followUserResult = await userProvider.retrieveFollow(userIdx);
+
+    if (followUserResult.length > 0) {
+        // 이미 팔로일한 유저
+        if (followUserResult[0].status == "DELETED") {
+            // 다시 팔로우
+            const activateFollow = await userService.updateFollow(userIdx, followUserIdx, 'ACTIVE');
+            return res.send(activateFollow);
+        } else {
+            // 팔로우 취소
+            const deleteFollow = await userService.updateFollow(userIdx, followUserIdx, 'DELETED');
+            return res.send(deleteFollow);
+        }
+    } else {
+        // 새로 생성
+        const followResponse = await userService.followUser(userIdx, followUserIdx);
+        return res.send(followResponse);
+    }
 };

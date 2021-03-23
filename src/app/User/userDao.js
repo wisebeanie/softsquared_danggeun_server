@@ -322,6 +322,38 @@ async function updateUserEmail(connection, updateParams) {
     return updateAccountRow;
 };
 
+async function selectFollow(connection, userIdx) {
+    const selectFollowQuery = `
+                SELECT status, followUserIdx
+                FROM Following
+                WHERE userIdx = ?;
+                `;
+    const [selectFollowRow] = await connection.query(selectFollowQuery, userIdx);
+
+    return selectFollowRow;
+};
+
+async function updateFollow(connection, userIdx, followUserIdx, status) {
+    const updateFollowQuery = `
+                UPDATE Following
+                SET status = '${status}'
+                WHERE userIdx = ${userIdx} and followUserIdx = ${followUserIdx};
+                `;
+    const [updateFollowRow] = await connection.query(updateFollowQuery, userIdx, followUserIdx, status);
+
+    return updateFollowRow;
+};
+
+async function insertFollow(connection, userIdx, followUserIdx) {
+    const insertFollowQuery = `
+                INSERT INTO Following(userIdx, followUserIdx) 
+                VALUES (${userIdx}, ${followUserIdx});
+                `;
+    const insertFollowRow = await connection.query(insertFollowQuery, userIdx, followUserIdx);
+
+    return insertFollowRow;
+};
+
 module.exports = {
     insertUser,
     selectUserPhoneNumber,
@@ -343,5 +375,8 @@ module.exports = {
     deleteJWT,
     withDrawUser,
     updateUserPhoneNumber,
-    updateUserEmail
+    updateUserEmail,
+    selectFollow,
+    updateFollow,
+    insertFollow
 };

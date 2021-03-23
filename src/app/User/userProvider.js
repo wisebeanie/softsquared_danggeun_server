@@ -51,7 +51,7 @@ exports.retrieveUserByIdx = async function(userIdx) {
     const userIdxResult = await userDao.selectUserByIdx(connection, userIdx);
     connection.release();
 
-    return response(baseResponse.SUCCESS, userIdxResult[0]);
+    return userIdxResult;
 };
 
 exports.retrieveUserProfile = async function(userIdx) {
@@ -93,4 +93,12 @@ exports.checkJWT = async function(userIdx) {
     connection.release();
 
     return checkJWTResult;
+};
+
+exports.retrieveFollow = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const followResult = await userDao.selectFollow(connection, userIdx);
+    connection.release();
+
+    return followResult;
 };

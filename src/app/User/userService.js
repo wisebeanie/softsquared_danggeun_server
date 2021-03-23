@@ -233,3 +233,41 @@ exports.updateUserAccount = async function(userIdx, phoneNumber, email) {
         return errResponse(baseResponse.DB_ERROR);
     }
 };
+
+exports.updateFollow = async function(userIdx, followUserIdx, status) {
+    try {
+        const userByIdx = await userProvider.retrieveUserByIdx(followUserIdx);
+        if (userByIdx.length < 1) {
+            return errResponse(baseResponse.USER_USER_NOT_EXIST);
+        }
+        const connection = await pool.getConnection(async (conn) => conn);
+        const updateFollowResult = await userDao.updateFollow(connection, userIdx, followUserIdx, status);
+        connection.release();
+
+        if (status == "DELETED") {
+            return response(baseResponse.SUCCESS, "팔로잉 취소");
+        } else {
+            return response(baseResponse.SUCCESS, "팔로잉 성공");
+        }
+    } catch (err) {
+        logger.error(`App - updateFollow Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};
+
+exports.followUser = async function(userIdx, followUserIdx) {
+    try {
+        const userByIdx = await userProvider.retrieveUserByIdx(followUserIdx);
+        if (userByIdx.length < 1) {
+            return errResponse(baseResponse.USER_USER_NOT_EXIST);
+        }
+        const connection = await pool.getConnection(async (conn) => conn);
+        const insertFollowResult = await userDao.insertFollow(connection, userIdx, followUserIdx);
+        connection.release();
+        
+        return response(baseResponse.SUCCESS);
+    } catch (err) {
+        logger.error(`App - followUser Service error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};
