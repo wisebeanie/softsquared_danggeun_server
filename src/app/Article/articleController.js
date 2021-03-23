@@ -340,8 +340,34 @@ exports.patchArticleStatus = async function(req, res) {
 /*
     API No. 26
     API Name : 검색 API
-    [GET] /app/articles/search
+    [GET] /app/search?page=&searchquery=
 */
-// exports.getSearch = async function(req, res) {
+exports.getSearch = async function(req, res) {
+    // Query String = searchquery, page
+    const searchQuery = req.query.searchquery;
+    var page = req.query.page;
 
-// }
+    if (!page) {
+        page = 1;
+    }
+
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    if (!searchQuery) {
+        res.send(response(baseResponse.SEARCH_SEARCHQUERY_EMPTY));
+    }
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdxFromJWT);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    } 
+
+    // 로그인 된 유저의 위경도
+    const latitude = await userProvider.retrieveLatitude(checkJWT[0].userIdx);
+    const longitude = await userProvider.retrieveLongitude(checkJWT[0].userIdx);
+
+    const searchResponse = await articleProvider.searchArticles(page, searchQuery, latitude.latitude, longitude.longitude);
+
+    return res.send(searchResponse);
+};

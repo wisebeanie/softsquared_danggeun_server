@@ -140,7 +140,7 @@ async function selectArticles (connection, latitude, longitude, categoryList, pa
                     FROM User
                     HAVING distance <= 4
                     LIMIT 0,300) point on point.idx = Article.userIdx
-                WHERE Article.status = 'SALE' and hide != 'Y'`;
+                WHERE Article.status != 'DELETED' and hide != 'Y'`;
     // 카테고리 필터링
     if (categoryList) {
         for (categoryListIdx in categoryList) {
@@ -623,7 +623,7 @@ async function selectSalesUserIdx(connection, userIdx) {
                         left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
                         left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
                         left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
-                    WHERE isAd = 'N' and Article.userIdx = ? and hide != 'Y' and Article.status != 'DELETED'
+                    WHERE Article.userIdx = ? and hide != 'Y' and Article.status != 'DELETED'
                     group by Article.idx
                     ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC;
                     `;
@@ -654,6 +654,89 @@ async function updateArticleHide(connection, articleIdx, hideOrNot) {
     return updateArticleHideRow;
 };
 
+async function searchArticles(connection, page, searchQuery, latitude, longitude) {
+    const searchArticlesQuery = `
+                SELECT Article.idx,
+                    case when isAd = 'N'
+                            then '중고거래'
+                        else '동네홍보'
+                    end as isAd,
+                    title,
+                    case when price = 0 and isAd = 'N'
+                            then '무료나눔'
+                        when isAd = 'Y' and price = 0
+                            then null
+                        else price
+                    end as price,
+                    case when isAd = 'N'
+                            then User.town
+                        else null
+                    end as town,
+                    case
+                        when pullUpStatus = 'N'
+                            then 'N'
+                        else '끌올'
+                        end as pullUpStatus,
+                    case
+                        when timestampdiff(second, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(second, Article.updatedAt, current_timestamp), '초 전')
+                        when timestampdiff(minute, Article.updatedAt, current_timestamp) < 60
+                            then concat(timestampdiff(minute, Article.updatedAt, current_timestamp), '분 전')
+                        when timestampdiff(hour, Article.updatedAt, current_timestamp) < 24
+                            then concat(timestampdiff(hour, Article.updatedAt, current_timestamp), '시간 전')
+                        when timestampdiff(day, Article.updatedAt, current_timestamp) < 7
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '일 전')
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) = 1
+                            then '지난 주'
+                        when timestampdiff(week, Article.updatedAt, current_timestamp) < 4 and timestampdiff(week, Article.updatedAt, current_timestamp) > 1
+                            then concat(timestampdiff(week, Article.updatedAt, current_timestamp), '주 전')
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) = 1
+                            then '지난 달'
+                        when timestampdiff(month, Article.updatedAt, current_timestamp) < 12 and timestampdiff(month, Article.updatedAt, current_timestamp) > 1
+                            then concat(timestampdiff(day, Article.updatedAt, current_timestamp), '개월 전')
+                        when timestampdiff(year, Article.updatedAt, current_timestamp) = 1
+                            then '지난 해'
+                        else concat(timestampdiff(year, Article.updatedAt, current_timestamp), '년 전')
+                        end as updateAt,
+                    case when liked is null
+                        then 0
+                        else liked
+                        end as likeCount,
+                    case when chat is null
+                        then 0
+                        else chat
+                        end as chatCount,
+                    case when comments is null
+                        then 0
+                        else comments
+                        end as commentCount,
+                    case when Article.status = 'RESERVED'
+                        then '예약중'
+                        else Article.status
+                        end as status
+                FROM Article
+                    left join User on Article.userIdx = User.idx
+                    left join ArticleImg on ArticleImg.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                    join (SELECT idx,
+                        (6371*acos(cos(radians(User.latitude))*cos(radians(${latitude}))*cos(radians(${longitude})
+                        -radians(User.longitude))+sin(radians(User.latitude))*sin(radians(${latitude}))))
+                        as distance
+                    FROM User
+                    HAVING distance <= 4
+                    LIMIT 0,300) point on point.idx = Article.userIdx
+                WHERE Article.status != 'DELETED' and hide != 'Y' and (Article.title LIKE '%${searchQuery}%')
+                group by Article.idx
+                ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC
+                LIMIT ${5 * page - 5}, 5;
+                `;
+    const [searchArticleRows] = await connection.query(searchArticlesQuery, page, searchQuery, latitude, longitude);
+
+    return searchArticleRows;
+};
+
 module.exports = {
     insertArticle,
     insertArticleImg,
@@ -675,5 +758,6 @@ module.exports = {
     selectHideArticles,
     selectSalesUserIdx,
     updateArticleStatus,
-    updateArticleHide
+    updateArticleHide,
+    searchArticles
 };

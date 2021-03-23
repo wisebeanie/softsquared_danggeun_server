@@ -27,5 +27,5 @@ module.exports = function(app) {
     app.patch('/app/articles/:articleIdx/status', jwtMiddleware, article.patchArticleStatus);
 
     // 26. 검색 API
-    // app.get('/app/articles/search', article.getSearch);
+    app.get('/app/search', jwtMiddleware, article.getSearch);
 }
