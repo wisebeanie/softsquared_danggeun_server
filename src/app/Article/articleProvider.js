@@ -193,3 +193,16 @@ exports.searchArticles = async function(page, searchQuery, latitude, longitude) 
     
     return response(baseResponse.SUCCESS, searchResult);
 };
+
+exports.retrieveFollowUsersArticles = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const articleResult = await articleDao.selectFollowUsersArticles(connection, userIdx);
+    for (article of articleResult) {
+        const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
+        const img = articleImgResult[0];
+        article.representativeImg = img;
+    }
+    connection.release();
+    
+    return articleResult;
+}

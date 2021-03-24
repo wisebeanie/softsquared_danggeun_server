@@ -776,3 +776,27 @@ exports.getFollow = async function(req, res) {
     
     return res.send(response(baseResponse.SUCCESS, followResult));
 };
+
+/*
+    API No. 32
+    API Name : 필로잉 유저의 판매글 조회 API
+    [GET] /app/users/{userIdx}/following/articles
+*/
+exports.getFollowUserArticles = async function(req, res) {
+    // Path Variable : userIdx;
+    const userIdx = req.params.userIdx;
+
+    if (!userIdx) {
+        return res.send(response(baseResponse.ARTICLE_USERIDX_EMPTY));
+    } 
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    }
+
+    const followUserArticlesResult = await articleProvider.retrieveFollowUsersArticles(userIdx);
+
+    return res.send(response(baseResponse.SUCCESS, followUserArticlesResult));
+};

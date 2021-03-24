@@ -62,4 +62,7 @@ module.exports = function(app){
 
     // 31. 팔로잉 유저 조회 API
     app.get('/app/users/:userIdx/following', jwtMiddleware, user.getFollow);
+    
+    // 32. 필로잉 유저의 판매글 모아보기
+    app.get('/app/users/:userIdx/following/articles', jwtMiddleware, user.getFollowUserArticles);
 };

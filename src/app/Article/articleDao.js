@@ -81,10 +81,7 @@ async function selectArticles (connection, latitude, longitude, categoryList, pa
                             then null
                         else price
                     end as price,
-                    case when isAd = 'N'
-                            then User.town
-                        else null
-                    end as town,
+                    User.town,
                     case
                         when pullUpStatus = 'N'
                             then 'N'
@@ -561,10 +558,7 @@ async function selectSalesUserIdx(connection, userIdx) {
                             then '중고거래'
                         else '동네홍보'
                     end as isAd,
-                    case when isAd = 'N'
-                            then User.town
-                        else null
-                    end as town, 
+                    town,
                     title,
                     case when price = 0 and isAd = 'N'
                             then '무료나눔'
@@ -668,10 +662,7 @@ async function searchArticles(connection, page, searchQuery, latitude, longitude
                             then null
                         else price
                     end as price,
-                    case when isAd = 'N'
-                            then User.town
-                        else null
-                    end as town,
+                    town,
                     case
                         when pullUpStatus = 'N'
                             then 'N'
@@ -727,7 +718,7 @@ async function searchArticles(connection, page, searchQuery, latitude, longitude
                     FROM User
                     HAVING distance <= 4
                     LIMIT 0,300) point on point.idx = Article.userIdx
-                WHERE Article.status != 'DELETED' and hide != 'Y' and (Article.title LIKE '%${searchQuery}%')
+                WHERE Article.status != 'DELETED' and Article.status != 'SOLD' and hide != 'Y' and (Article.title LIKE '%${searchQuery}%')
                 group by Article.idx
                 ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC
                 LIMIT ${5 * page - 5}, 5;
@@ -735,6 +726,55 @@ async function searchArticles(connection, page, searchQuery, latitude, longitude
     const [searchArticleRows] = await connection.query(searchArticlesQuery, page, searchQuery, latitude, longitude);
 
     return searchArticleRows;
+};
+
+async function selectFollowUsersArticles(connection, userIdx) {
+    const selectFollowUsersArticlesquery = `
+                SELECT Article.idx,
+                    case when isAd = 'N'
+                            then '중고거래'
+                        else '동네홍보'
+                    end as isAd,
+                    nickName,
+                    title,
+                    case when price = 0 and isAd = 'N'
+                            then '무료나눔'
+                        when isAd = 'Y' and price = 0
+                            then null
+                        else price
+                    end as price,
+                    town,
+                    case when liked is null
+                        then 0
+                        else liked
+                        end as likeCount,
+                    case when chat is null
+                        then 0
+                        else chat
+                        end as chatCount,
+                    case when comments is null
+                        then 0
+                        else comments
+                        end as commentCount,
+                    case when Article.status = 'SOLD'
+                        then '거래완료'
+                        when Article.status = 'RESERVED'
+                            then '예약중'
+                        else Article.status
+                        end as status
+                FROM Article
+                    left join User on Article.userIdx = User.idx
+                    left join ArticleImg on ArticleImg.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                    join Following on Following.followUserIdx = User.idx
+                WHERE Article.status != 'DELETED' and hide != 'Y' and Following.userIdx = ?
+                group by Article.idx;
+                `;
+    const [selectFollowUsersArticlesRow] = await connection.query(selectFollowUsersArticlesquery, userIdx);
+
+    return selectFollowUsersArticlesRow;
 };
 
 module.exports = {
@@ -759,5 +799,6 @@ module.exports = {
     selectSalesUserIdx,
     updateArticleStatus,
     updateArticleHide,
-    searchArticles
+    searchArticles,
+    selectFollowUsersArticles
 };
