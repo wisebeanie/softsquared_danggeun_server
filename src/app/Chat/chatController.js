@@ -7,7 +7,7 @@ const {response, errResponse} = require("../../../config/response");
 const userProvider = require("../User/userProvider");
 
 /*
-    API No. 33 채팅 보내기 API
+    API No. 33 
     API Name : 채팅 전송 API
     [POST] /app/chat
 */
@@ -34,4 +34,30 @@ exports.postChat = async function (req, res) {
     const postChatResponse = await chatService.createChat(chatRoomIdx, articleIdx, userIdxFromJWT, content);
 
     res.send(postChatResponse);
+};
+
+/*
+    API No. 34 
+    API Name : 채팅 조회 API
+    [GET] /app/chat{chatRoomIdx}
+*/
+exports.getChat = async function (req, res) {
+    // Path Variable : chatRoomIdx
+    const chatRoomIdx = req.params.chatRoomIdx;
+
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+  
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdxFromJWT);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    } 
+
+    if (!chatRoomIdx) {
+        return res.send(response(baseResponse.CHAT_CHATROOMIDX_EMPTY));
+    }
+
+    const chatResult = await chatProvider.retrieveChatBychatRoomIdx(chatRoomIdx);
+
+    return res.send(chatResult);
 };
