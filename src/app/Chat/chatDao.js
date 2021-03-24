@@ -47,9 +47,15 @@ async function selectChatByChatRoomIdx(connection, chatRoomIdx) {
                     senderIdx,
                     content,
                     isRead,
-                    case when date_format(createdAt, '%p') = 'AM'
-                        then concat('오전 ', date_format(createdAt, '%h:%i'))
-                    else concat('오후 ', date_format(createdAt, '%h:%i'))
+                    case when timestampdiff(year, createdAt, current_timestamp) > 1
+                            then date_format(createdAt, '%Y년 %c월 %d일')
+                        when timestampdiff(hour, createdAt, current_timestamp) > 24
+                            then date_format(createdAt, '%c월 %d일')
+                        else
+                            case when date_format(createdAt, '%p') = 'AM'
+                                    then concat('오전 ', date_format(createdAt, '%h:%i'))
+                                else concat('오후 ', date_format(createdAt, '%h:%i'))
+                                end
                     end as sendTime
                 FROM Chat
                 WHERE chatRoomIdx = ${chatRoomIdx} 
@@ -86,10 +92,16 @@ async function selectChatRoom(connection, userIdx) {
                     join (select Chat.chatRoomIdx,
                                 content as lastChatMessage,
                                 createdAt,
-                                case when date_format(createdAt, '%p') = 'AM'
-                                        then concat('오전 ', date_format(createdAt, '%h:%i'))
-                                    else concat('오후 ', date_format(createdAt, '%h:%i'))
-                                    end as sendTime
+                                case when timestampdiff(year, createdAt, current_timestamp) > 1
+                            then date_format(createdAt, '%Y년 %c월 %d일')
+                        when timestampdiff(hour, createdAt, current_timestamp) > 24
+                            then date_format(createdAt, '%c월 %d일')
+                        else
+                            case when date_format(createdAt, '%p') = 'AM'
+                                    then concat('오전 ', date_format(createdAt, '%h:%i'))
+                                else concat('오후 ', date_format(createdAt, '%h:%i'))
+                                end
+                    end as sendTime
                             from Chat join (select Chat.chatRoomIdx, max(idx) from Chat group by Chat.chatRoomIdx) currentMessage) as d on d.chatRoomIdx = ChatRoom.idx
                 WHERE User.idx = ?
                 group by ChatRoom.idx
