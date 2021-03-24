@@ -233,7 +233,7 @@ exports.postUsers = async function(req, res) {
     }
 
     if (!profileImgUrl) {
-        profileImgUrl = 'BASICIMGURL';
+        profileImgUrl = 'https://lh3.googleusercontent.com/proxy/RiHjEIJM-FqkPogYJrlhw29zvwQ1sLO7nSatg90AikhUeqDCPEtTydF8h-wv_GUCihWh04ADonDG9YmJo1mVpr-mdzkZ-oqAHje3NN3ZANGSILg-JuK39v8JVEU8pcCwBtvHtC4y7UxKZxrRNY4HjeXXNN_GA699GgbgHnMwPg';
     }
 
     const encodedTown = queryString.escape(town);
