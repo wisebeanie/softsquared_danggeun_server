@@ -28,4 +28,7 @@ module.exports = function(app) {
 
     // 26. 검색 API
     app.get('/app/search', jwtMiddleware, article.getSearch);
+
+    // 3. 구매 확정 API
+    app.post('/app/articles/buyer', jwtMiddleware, article.postBuyer);
 }

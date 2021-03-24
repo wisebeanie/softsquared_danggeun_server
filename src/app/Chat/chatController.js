@@ -65,10 +65,14 @@ exports.getChat = async function (req, res) {
 /*
     API No. 35
     API Name : 채팅방 조회 API
-    [GET] /app/chatroom
+    [GET] /app/chatroom?articleIdx=
 */
 exports.getChatRooms = async function(req, res) {
+    // Query String : articleIdx
+    const articleIdx = req.query.articleIdx;
+    
     const userIdxFromJWT = req.verifiedToken.userIdx;
+
 
     const token = req.headers['x-access-token'];
     const checkJWT = await userProvider.checkJWT(userIdxFromJWT);
@@ -76,7 +80,7 @@ exports.getChatRooms = async function(req, res) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
     } 
 
-    const chatRoomResult = await chatProvider.retrieveChatRoom(userIdxFromJWT);
+    const chatRoomResult = await chatProvider.retrieveChatRoom(userIdxFromJWT, articleIdx);
 
     return res.send(chatRoomResult);
 };

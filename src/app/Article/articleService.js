@@ -34,7 +34,7 @@ exports.createArticle = async function (userIdx, title, description, articleImgU
         await connection.commit();
         connection.release();
 
-        return response(baseResponse.SUCCESS, {"added Article": articleIdx});
+        return response(baseResponse.SUCCESS, {"addedArticle": articleIdx});
     } catch(err) {
         logger.error(`App - createArticle Service Error\n: ${err.message}`);
         await connection.rollback();
@@ -70,7 +70,7 @@ exports.createLocalAd = async function (userIdx, title, description, articleImgU
         await connection.commit();
         connection.release();
 
-        return response(baseResponse.SUCCESS, {"added localAd": localAdIdx});
+        return response(baseResponse.SUCCESS, {"addedlocalAd": localAdIdx});
     } catch(err) {
         logger.error(`App - createArticle Service Error\n: ${err.message}`);
         await connection.rollback();

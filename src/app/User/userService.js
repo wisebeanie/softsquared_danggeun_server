@@ -31,7 +31,7 @@ exports.createUser = async function (nickName, phoneNumber, profileImgUrl, town,
         const userIdResult = await userDao.insertUser(connection, insertUserInfoParams);
         connection.release();
 
-        return response(baseResponse.SUCCESS, {"added User": userIdResult[0].insertId});
+        return response(baseResponse.SUCCESS, {"addedUser": userIdResult[0].insertId});
     } catch (err) {
         logger.error(`App - createUser Service error\n: ${err.message}`);
         return errResponse(baseResponse.DB_ERROR);

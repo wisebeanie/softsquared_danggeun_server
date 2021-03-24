@@ -112,11 +112,25 @@ async function selectChatRoom(connection, userIdx) {
     return chatRoomRows;
 };
 
+async function selectChatRoomByArticle(connection, articleIdx) {
+    const selectChatRoomByArticleQuery = `
+                SELECT nickName,
+                    town,
+                    profileImgUrl
+                FROM User
+                    join (select buyerIdx from ChatRoom where articleIdx = ${articleIdx}) c on c.buyerIdx = User.idx;
+                `;
+    const [UserRows] = await connection.query(selectChatRoomByArticleQuery, articleIdx);
+    
+    return UserRows;
+};
+
 module.exports = {
     createChatRoom,
     createChat,
     selectArticleByChatRoom,
     selectChatByChatRoomIdx,
     updateChatRead,
-    selectChatRoom
+    selectChatRoom,
+    selectChatRoomByArticle
 };

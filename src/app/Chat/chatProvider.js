@@ -40,16 +40,25 @@ exports.retrieveChatBychatRoomIdx = async function(chatRoomIdx) {
     }
 };
 
-exports.retrieveChatRoom = async function(userIdx) {
+exports.retrieveChatRoom = async function(userIdx, articleIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
-    const chatRoomResult = await chatDao.selectChatRoom(connection, userIdx);
 
-    for (article of chatRoomResult) {
-        const articleImgResult = await articleDao.selectArticleImg(connection, article.articleIdx);
-        const img = articleImgResult[0];
-        article.representativeImg = img;
+    if (!articleIdx) {
+        // 유저 별로 조회
+        const chatRoomResult = await chatDao.selectChatRoom(connection, userIdx);
+
+        for (article of chatRoomResult) {
+            const articleImgResult = await articleDao.selectArticleImg(connection, article.articleIdx);
+            const img = articleImgResult[0];
+            article.representativeImg = img;
+        }
+        connection.release();
+        
+        return response(baseResponse.SUCCESS, chatRoomResult);
+    } else {
+        const chatRoomUserResult = await chatDao.selectChatRoomByArticle(connection, articleIdx);
+        connection.release();
+
+        return response(baseResponse.SUCCESS, chatRoomUserResult);
     }
-    connection.release();
-    
-    return response(baseResponse.SUCCESS, chatRoomResult);
 };

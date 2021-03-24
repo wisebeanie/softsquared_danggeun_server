@@ -27,7 +27,7 @@ exports.createChat = async function(chatRoomIdx, articleIdx, senderIdx, content)
             const createChat = await chatDao.createChat(connection, createChatParams);
             await connection.commit();
             connection.release();
-            return response(baseResponse.SUCCESS, {"added chatRoomIdx": newChatRoomIdx});
+            return response(baseResponse.SUCCESS, {"addedchatRoomIdx": newChatRoomIdx});
         } else {
             // 원래 있던 채팅방에 채팅 보내기
             const createChatParams = [chatRoomIdx, senderIdx, content];

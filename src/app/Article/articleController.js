@@ -371,3 +371,15 @@ exports.getSearch = async function(req, res) {
 
     return res.send(searchResponse);
 };
+
+/*
+    API No. 39
+    API Name : 구매자 확정 API
+    [GET] /app/articles/buyer
+*/
+exports.postBuyer = async function(req, res) {
+    /*
+        Body : articleIdx, userIdx
+    */
+    
+}
