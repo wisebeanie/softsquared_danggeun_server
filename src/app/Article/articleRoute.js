@@ -31,4 +31,7 @@ module.exports = function(app) {
 
     // 36. 구매 확정 API
     app.post('/app/articles/buyer', jwtMiddleware, article.postBuyer);
+
+    // 37. 구매 내역 조회 API
+    app.get('/app/users/:userIdx/bought', jwtMiddleware, article.getBought);
 }

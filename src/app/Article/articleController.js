@@ -373,9 +373,9 @@ exports.getSearch = async function(req, res) {
 };
 
 /*
-    API No. 39
+    API No. 36
     API Name : 구매자 확정 API
-    [GET] /app/articles/buyer
+    [POST] /app/articles/buyer
 */
 exports.postBuyer = async function(req, res) {
     /*
@@ -383,6 +383,14 @@ exports.postBuyer = async function(req, res) {
     */
     const { articleIdx, userIdx } = req.body;
     
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdxFromJWT);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    } 
+
     if (!articleIdx) {
         return res.send(response(baseResponse.ARTICLE_ARTICLEIDX_EMPTY));
     } else if (!userIdx) {
@@ -392,4 +400,28 @@ exports.postBuyer = async function(req, res) {
     const createBuyer = await articleService.createBuyer(articleIdx, userIdx);
 
     return res.send(createBuyer);
+};
+
+/*
+    API No. 37
+    API Name : 구매내역 조회 API
+    [GET] /app/users/{userIdx}/bought
+*/
+exports.getBought = async function(req, res) {
+    // Path Variable : userIdx
+    const userIdx = req.params.userIdx;
+
+    if (!userIdx) {
+        return res.send(response(baseResponse.USER_USERIDX_EMPTY));
+    }
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdx);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    } 
+
+    const boughtResult = await articleProvider.retrieveBoughtList(userIdx);
+
+    return res.send(boughtResult);
 };

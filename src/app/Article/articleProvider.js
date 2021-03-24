@@ -205,7 +205,7 @@ exports.retrieveFollowUsersArticles = async function(userIdx) {
     connection.release();
     
     return articleResult;
-}
+};
 
 exports.retrieveUserByArticle = async function(articleIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
@@ -213,4 +213,17 @@ exports.retrieveUserByArticle = async function(articleIdx) {
     connection.release();
 
     return userResult;
-}
+};
+
+exports.retrieveBoughtList = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const boughtResult = await articleDao.selectBoughtArticle(connection, userIdx);
+    for (article of boughtResult) {
+        const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
+        const img = articleImgResult[0];
+        article.representativeImg = img;
+    }
+    connection.release();
+
+    return response(baseResponse.SUCCESS, boughtResult);
+};

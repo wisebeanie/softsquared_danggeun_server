@@ -164,14 +164,19 @@ exports.editArticleHide = async function(articleIdx, hideOrNot) {
 };
 
 exports.createBuyer = async function(articleIdx, userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
     try {
-        const connection = await pool.getConnection(async (conn) => conn);
+        await connection.beginTransaction();
+        const updateArticleStatus = await this.updateArticleStatus(articleIdx, 'SOLD');
         const buyerResult = await articleDao.insertBuyer(connection, articleIdx, userIdx);
+        await connection.commit();
         connection.release();
 
         return response(baseResponse.SUCCESS);
     } catch (err) {
         logger.error(`APP - createBuyer Service Error\n: ${err.message}`);
+        await connection.rollback();
+        connection.release();
         return errResponse(baseResponse.DB_ERROR);
     }
 }
