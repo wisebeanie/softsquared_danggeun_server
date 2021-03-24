@@ -788,6 +788,16 @@ async function selectUserByArticle(connection, articleIdx) {
     return userResult;
 };
 
+async function insertBuyer(connection, articleIdx, userIdx) {
+    const insertBuyerQuery = `
+                INSERT INTO BoughtArticle(articleIdx, userIdx)
+                VALUES (${articleIdx}, ${userIdx});
+                `;
+    const buyerRow = await connection.query(insertBuyerQuery, articleIdx, userIdx);
+
+    return buyerRow;
+};
+
 module.exports = {
     insertArticle,
     insertArticleImg,
@@ -812,5 +822,6 @@ module.exports = {
     updateArticleHide,
     searchArticles,
     selectFollowUsersArticles,
-    selectUserByArticle
+    selectUserByArticle,
+    insertBuyer
 };

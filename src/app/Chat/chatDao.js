@@ -85,7 +85,11 @@ async function selectChatRoom(connection, userIdx) {
                     e.profileImgUrl,
                     e.nickName,
                     e.town,
-                    ChatRoom.articleIdx
+                    ChatRoom.articleIdx,
+                    case when notRead is null
+                        then 0
+                        else notRead
+                    end as notRead
                 FROM User
                     join ChatRoom on ChatRoom.buyerIdx = User.idx or ChatRoom.sellerIdx = User.idx
                     join (select userIdx, profileImgUrl, nickName, town, Article.idx from User join Article on Article.userIdx = User.idx) e on e.idx = ChatRoom.articleIdx
@@ -101,8 +105,9 @@ async function selectChatRoom(connection, userIdx) {
                                     then concat('오전 ', date_format(createdAt, '%h:%i'))
                                 else concat('오후 ', date_format(createdAt, '%h:%i'))
                                 end
-                    end as sendTime
+                        end as sendTime
                             from Chat join (select Chat.chatRoomIdx, max(idx) from Chat group by Chat.chatRoomIdx) currentMessage) as d on d.chatRoomIdx = ChatRoom.idx
+                        left join (select Count(idx) as notRead, chatRoomIdx from Chat where isRead = 'N' group by chatRoomIdx) c on c.chatRoomIdx = ChatRoom.idx
                 WHERE User.idx = ?
                 group by ChatRoom.idx
                 order by d.createdAt DESC;

@@ -381,5 +381,15 @@ exports.postBuyer = async function(req, res) {
     /*
         Body : articleIdx, userIdx
     */
+    const { articleIdx, userIdx } = req.body;
     
-}
+    if (!articleIdx) {
+        return res.send(response(baseResponse.ARTICLE_ARTICLEIDX_EMPTY));
+    } else if (!userIdx) {
+        return res.send(response(baseResponse.USER_USERIDX_EMPTY));
+    }
+
+    const createBuyer = await articleService.createBuyer(articleIdx, userIdx);
+
+    return res.send(createBuyer);
+};

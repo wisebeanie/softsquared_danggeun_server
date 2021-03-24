@@ -146,7 +146,6 @@ exports.editArticleStatus = async function(articleIdx, status) {
         return response(baseResponse.SUCCESS);
     } catch (err) {
         logger.error(`App - editArticleStatus Service Error\n: ${err.message}`);
-        connection.release();
         return errResponse(baseResponse.DB_ERROR);
     }
 };
@@ -160,7 +159,19 @@ exports.editArticleHide = async function(articleIdx, hideOrNot) {
         return response(baseResponse.SUCCESS);
     } catch (err) {
         logger.error(`APP - editArticleHide Service Error\n: ${err.message}`);
-        connection.release();
         return errResponse(baseResponse.DB_ERROR);
     }
 };
+
+exports.createBuyer = async function(articleIdx, userIdx) {
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+        const buyerResult = await articleDao.insertBuyer(connection, articleIdx, userIdx);
+        connection.release();
+
+        return response(baseResponse.SUCCESS);
+    } catch (err) {
+        logger.error(`APP - createBuyer Service Error\n: ${err.message}`);
+        return errResponse(baseResponse.DB_ERROR);
+    }
+}
