@@ -180,9 +180,9 @@ exports.retrieveArticleIdx = async function(articleIdx) {
     return articleResult;
 };
 
-exports.searchArticles = async function(page, searchQuery, latitude, longitude) {
+exports.searchArticles = async function(page, searchQueryList, latitude, longitude) {
     const connection = await pool.getConnection(async (conn) => conn);
-    const searchResult = await articleDao.searchArticles(connection, page, searchQuery, latitude, longitude);
+    const searchResult = await articleDao.searchArticles(connection, page, searchQueryList, latitude, longitude);
 
     for (article of searchResult) {
         const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);

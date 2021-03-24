@@ -363,11 +363,13 @@ exports.getSearch = async function(req, res) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
     } 
 
+    var searchQueryList = searchQuery.split(' ');
+
     // 로그인 된 유저의 위경도
     const latitude = await userProvider.retrieveLatitude(checkJWT[0].userIdx);
     const longitude = await userProvider.retrieveLongitude(checkJWT[0].userIdx);
 
-    const searchResponse = await articleProvider.searchArticles(page, searchQuery, latitude.latitude, longitude.longitude);
+    const searchResponse = await articleProvider.searchArticles(page, searchQueryList, latitude.latitude, longitude.longitude);
 
     return res.send(searchResponse);
 };

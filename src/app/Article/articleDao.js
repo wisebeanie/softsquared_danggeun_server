@@ -648,18 +648,15 @@ async function updateArticleHide(connection, articleIdx, hideOrNot) {
     return updateArticleHideRow;
 };
 
-async function searchArticles(connection, page, searchQuery, latitude, longitude) {
-    const searchArticlesQuery = `
+async function searchArticles(connection, page, searchQueryList, latitude, longitude) {
+    var searchArticlesQuery = `
                 SELECT Article.idx,
                     case when isAd = 'N'
                             then '중고거래'
-                        else '동네홍보'
                     end as isAd,
                     title,
-                    case when price = 0 and isAd = 'N'
+                    case when price = 0 
                             then '무료나눔'
-                        when isAd = 'Y' and price = 0
-                            then null
                         else price
                     end as price,
                     town,
@@ -697,10 +694,6 @@ async function searchArticles(connection, page, searchQuery, latitude, longitude
                         then 0
                         else chat
                         end as chatCount,
-                    case when comments is null
-                        then 0
-                        else comments
-                        end as commentCount,
                     case when Article.status = 'RESERVED'
                         then '예약중'
                         else Article.status
@@ -710,7 +703,6 @@ async function searchArticles(connection, page, searchQuery, latitude, longitude
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
                     join (SELECT idx,
                         (6371*acos(cos(radians(User.latitude))*cos(radians(${latitude}))*cos(radians(${longitude})
                         -radians(User.longitude))+sin(radians(User.latitude))*sin(radians(${latitude}))))
@@ -718,11 +710,21 @@ async function searchArticles(connection, page, searchQuery, latitude, longitude
                     FROM User
                     HAVING distance <= 4
                     LIMIT 0,300) point on point.idx = Article.userIdx
-                WHERE Article.status != 'DELETED' and Article.status != 'SOLD' and hide != 'Y' and (Article.title LIKE '%${searchQuery}%')
-                group by Article.idx
-                ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC
-                LIMIT ${5 * page - 5}, 5;
-                `;
+                WHERE Article.isAd = 'N' and Article.status != 'DELETED' and Article.status != 'SOLD' and hide != 'Y' and `;
+    for (searchQuery in searchQueryList) {
+        if (searchQueryList.length == 1) {
+            searchArticlesQuery += `(Article.title LIKE '%${searchQueryList[searchQuery]}%')`;
+        } else if (searchQuery == searchQueryList.length - 1) {
+            searchArticlesQuery += `(Article.title LIKE '%${searchQueryList[searchQuery]}%')`;
+        } else {
+            searchArticlesQuery += `(Article.title LIKE '%${searchQueryList[searchQuery]}%') or `;
+        }
+    }
+
+    searchArticlesQuery += ` group by Article.idx
+    ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC
+    LIMIT ${5 * page - 5}, 5;`;
+
     const [searchArticleRows] = await connection.query(searchArticlesQuery, page, searchQuery, latitude, longitude);
 
     return searchArticleRows;
