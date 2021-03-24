@@ -365,6 +365,8 @@ exports.getSearch = async function(req, res) {
 
     var searchQueryList = searchQuery.split(' ');
 
+    searchQueryList.splice(searchQueryList.indexOf(searchQueryList.length == 0));
+
     // 로그인 된 유저의 위경도
     const latitude = await userProvider.retrieveLatitude(checkJWT[0].userIdx);
     const longitude = await userProvider.retrieveLongitude(checkJWT[0].userIdx);

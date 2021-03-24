@@ -870,6 +870,38 @@ async function selectBoughtArticle(connection, userIdx) {
     return boughtResult;
 };
 
+async function selectSearchWord(connection, searchQuery) {
+    const selectSearchWordQuery = `
+                SELECT searchWord
+                FROM SearchWord
+                WHERE searchWord = '${searchQuery}';
+                `;
+    const [searchWordRow] = await connection.query(selectSearchWordQuery, searchQuery);
+    
+    return searchWordRow;
+};
+
+async function insertSearchWord(connection, searchQuery) {
+    const insertSearchWordQuery = `
+                INSERT INTO SearchWord(searchWord)
+                VALUES('${searchQuery}');
+                `;
+    const searchWordRow = await connection.query(insertSearchWordQuery, searchQuery);
+
+    return searchWordRow;
+};
+
+async function updateSearchWord(connection, searchQuery) {
+    const updateSearchWordQuery = `
+                UPDATE SearchWord
+                SET count = count + 1
+                WHERE searchWord = '${searchQuery}';
+                `;
+    const updateResult = await connection.query(updateSearchWordQuery, searchQuery);
+
+    return updateResult;
+};
+
 module.exports = {
     insertArticle,
     insertArticleImg,
@@ -896,5 +928,8 @@ module.exports = {
     selectFollowUsersArticles,
     selectUserByArticle,
     insertBuyer,
-    selectBoughtArticle
+    selectBoughtArticle,
+    selectSearchWord,
+    insertSearchWord,
+    updateSearchWord
 };

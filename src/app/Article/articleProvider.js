@@ -182,16 +182,37 @@ exports.retrieveArticleIdx = async function(articleIdx) {
 
 exports.searchArticles = async function(page, searchQueryList, latitude, longitude) {
     const connection = await pool.getConnection(async (conn) => conn);
-    const searchResult = await articleDao.searchArticles(connection, page, searchQueryList, latitude, longitude);
+    try {
+        await connection.beginTransaction();
+        const searchResult = await articleDao.searchArticles(connection, page, searchQueryList, latitude, longitude);
 
-    for (article of searchResult) {
-        const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
-        const img = articleImgResult[0];
-        article.representativeImg = img;
-    }
-    connection.release();
+        for (article of searchResult) {
+            const articleImgResult = await articleDao.selectArticleImg(connection, article.idx);
+            const img = articleImgResult[0];
+            article.representativeImg = img;
+        }
+
+        // 검색어 저장
+        for (searchQuery of searchQueryList) {
+            const checkSearchWord = await articleDao.selectSearchWord(connection, searchQuery);
+            // 저장되지 않은 검색어
+            if (checkSearchWord.length < 1) {
+                const insertSearchWord = await articleDao.insertSearchWord(connection, searchQuery);
+            } else {
+                const updateSearchWord = await articleDao.updateSearchWord(connection, searchQuery);
+            }
+        }
+
+        await connection.commit();
+        connection.release();
     
-    return response(baseResponse.SUCCESS, searchResult);
+        return response(baseResponse.SUCCESS, searchResult);
+    } catch (err) {
+        logger.error(`App - searchArticles Error\n: ${err.message}`);
+        await connection.rollback();
+        connection.release();
+        return errResponse(baseResponse.DB_ERROR);
+    }
 };
 
 exports.retrieveFollowUsersArticles = async function(userIdx) {
