@@ -110,6 +110,11 @@ module.exports = {
     SEARCH_SEARCHQUERY_EMPTY : { "isSuccess": false, "code": 2070, "message": "검색어를 입력해주세요" },
     USER_FOLLOWUSER_EMPTY : { "isSuccess": false, "code": 2071, "message": "followUserIdx를 입력해주세요." },
 
+    CHAT_ARTICLEIDX_EMPTY : { "isSuccess": false, "code": 2072, "message": "articleIdx를 입력해주세요." },
+    CHAT_CHATROOMIDX_EMPTY : { "isSuccess": false, "code": 2073, "message": "chatroomIdx를 입력해주세요." },
+    CHAT_SENDERIDX_EMPTY : { "isSuccess": false, "code": 2074, "message": "senderIdx를 입력해주세요." },
+    CHAT_CONTENT_EMPTY : { "isSuccess": false, "code": "2075", "message": "content를 입력해주세요." },
+
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},
@@ -142,7 +147,7 @@ module.exports = {
 
     ALREADY_LOGIN : { "isSuccess": false, "code": 3020, "message": "이미 로그인된 유저입니다." },
     NOT_LOGIN : { "isSuccess": false, "code": 3021, "message": "로그인되지 않았습니다." },
-    
+
     //Connection, Transaction 등의 서버 오류
     DB_ERROR : { "isSuccess": false, "code": 4000, "message": "데이터 베이스 에러"},
     SERVER_ERROR : { "isSuccess": false, "code": 4001, "message": "서버 에러"},

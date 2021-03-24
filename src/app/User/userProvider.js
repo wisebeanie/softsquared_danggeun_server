@@ -110,3 +110,11 @@ exports.retrieveFollowUsers = async function(userIdx) {
 
     return followResult;
 };
+
+exports.retrieveUserIdxByArticle = async function(articleIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const userResult = await userDao.selectUserByArticle(connection, articleIdx);
+    connection.release();
+
+    return userResult[0].userIdx;
+}

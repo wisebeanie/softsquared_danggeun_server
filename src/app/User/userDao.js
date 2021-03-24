@@ -369,6 +369,17 @@ async function selectFollowUsers(connection, userIdx) {
     return selectFollowUsersRow;
 };
 
+async function selectUserByArticle(connection, articleIdx) {
+    const selectUserByArticleQuery = `
+                SELECT userIdx
+                FROM Article
+                WHERE idx = ?;
+                `;
+    const [userRow] = await connection.query(selectUserByArticleQuery, articleIdx);
+
+    return userRow;
+};
+
 module.exports = {
     insertUser,
     selectUserPhoneNumber,
@@ -394,5 +405,6 @@ module.exports = {
     selectFollow,
     updateFollow,
     insertFollow,
-    selectFollowUsers
+    selectFollowUsers,
+    selectUserByArticle
 };
