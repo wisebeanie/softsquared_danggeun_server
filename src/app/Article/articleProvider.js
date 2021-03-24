@@ -206,3 +206,11 @@ exports.retrieveFollowUsersArticles = async function(userIdx) {
     
     return articleResult;
 }
+
+exports.retrieveUserByArticle = async function(articleIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const userResult = await articleDao.selectUserByArticle(connection, articleIdx);
+    connection.release();
+
+    return userResult;
+}

@@ -1,9 +1,9 @@
-async function createChatRoom(connection, articleIdx, buyerIdx) {
+async function createChatRoom(connection, articleIdx, buyerIdx, sellerIdx) {
     const createChatRoomQuery = `
-                INSERT INTO ChatRoom(articleIdx, buyerIdx)
-                VALUES (${articleIdx}, ${buyerIdx});
+                INSERT INTO ChatRoom(articleIdx, buyerIdx, sellerIdx)
+                VALUES (${articleIdx}, ${buyerIdx}, ${sellerIdx});
                 `; 
-    const createChatRoomRow = await connection.query(createChatRoomQuery, articleIdx, buyerIdx);
+    const createChatRoomRow = await connection.query(createChatRoomQuery, articleIdx, buyerIdx, sellerIdx);
 
     return createChatRoomRow;
 };
@@ -25,7 +25,10 @@ async function selectArticleByChatRoom(connection, chatRoomIdx) {
                     nickName,
                     manner,
                     title,
-                    price
+                    case when price = 0
+                            then '무료나눔'
+                        else price
+                    end as price
                 FROM User
                     join Article on Article.userIdx = User.idx
                     join ChatRoom on ChatRoom.articleIdx = Article.idx
@@ -68,10 +71,40 @@ async function updateChatRead(connection, chatRoomIdx) {
     return updateChatRow;
 };
 
+async function selectChatRoom(connection, userIdx) {
+    const selectChatRoomQuery = `
+                SELECT ChatRoom.idx,
+                    lastChatMessage,
+                    sendTime,
+                    e.profileImgUrl,
+                    e.nickName,
+                    e.town,
+                    ChatRoom.articleIdx
+                FROM User
+                    join ChatRoom on ChatRoom.buyerIdx = User.idx or ChatRoom.sellerIdx = User.idx
+                    join (select userIdx, profileImgUrl, nickName, town, Article.idx from User join Article on Article.userIdx = User.idx) e on e.idx = ChatRoom.articleIdx
+                    join (select Chat.chatRoomIdx,
+                                content as lastChatMessage,
+                                createdAt,
+                                case when date_format(createdAt, '%p') = 'AM'
+                                        then concat('오전 ', date_format(createdAt, '%h:%i'))
+                                    else concat('오후 ', date_format(createdAt, '%h:%i'))
+                                    end as sendTime
+                            from Chat join (select Chat.chatRoomIdx, max(idx) from Chat group by Chat.chatRoomIdx) currentMessage) as d on d.chatRoomIdx = ChatRoom.idx
+                WHERE User.idx = ?
+                group by ChatRoom.idx
+                order by d.createdAt DESC;
+                `;
+    const [chatRoomRows] = await connection.query(selectChatRoomQuery, userIdx);
+
+    return chatRoomRows;
+};
+
 module.exports = {
     createChatRoom,
     createChat,
     selectArticleByChatRoom,
     selectChatByChatRoomIdx,
-    updateChatRead
+    updateChatRead,
+    selectChatRoom
 };

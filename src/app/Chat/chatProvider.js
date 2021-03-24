@@ -38,5 +38,18 @@ exports.retrieveChatBychatRoomIdx = async function(chatRoomIdx) {
         connection.release();
         return errResponse(baseResponse.DB_ERROR);
     }
+};
 
+exports.retrieveChatRoom = async function(userIdx) {
+    const connection = await pool.getConnection(async (conn) => conn);
+    const chatRoomResult = await chatDao.selectChatRoom(connection, userIdx);
+
+    for (article of chatRoomResult) {
+        const articleImgResult = await articleDao.selectArticleImg(connection, article.articleIdx);
+        const img = articleImgResult[0];
+        article.representativeImg = img;
+    }
+    connection.release();
+    
+    return response(baseResponse.SUCCESS, chatRoomResult);
 };

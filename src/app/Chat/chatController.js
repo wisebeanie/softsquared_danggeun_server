@@ -61,3 +61,22 @@ exports.getChat = async function (req, res) {
 
     return res.send(chatResult);
 };
+
+/*
+    API No. 35
+    API Name : 채팅방 조회 API
+    [GET] /app/chatroom
+*/
+exports.getChatRooms = async function(req, res) {
+    const userIdxFromJWT = req.verifiedToken.userIdx;
+
+    const token = req.headers['x-access-token'];
+    const checkJWT = await userProvider.checkJWT(userIdxFromJWT);
+    if (checkJWT.length < 1 || token != checkJWT[0].jwt) {
+        return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
+    } 
+
+    const chatRoomResult = await chatProvider.retrieveChatRoom(userIdxFromJWT);
+
+    return res.send(chatRoomResult);
+};

@@ -777,6 +777,17 @@ async function selectFollowUsersArticles(connection, userIdx) {
     return selectFollowUsersArticlesRow;
 };
 
+async function selectUserByArticle(connection, articleIdx) {
+    const selectUserByArticleQuery = `
+                SELECT userIdx
+                FROM Article
+                WHERE idx = ?;
+                `;
+    const [userResult] = await connection.query(selectUserByArticleQuery, articleIdx);
+
+    return userResult;
+};
+
 module.exports = {
     insertArticle,
     insertArticleImg,
@@ -800,5 +811,6 @@ module.exports = {
     updateArticleStatus,
     updateArticleHide,
     searchArticles,
-    selectFollowUsersArticles
+    selectFollowUsersArticles,
+    selectUserByArticle
 };

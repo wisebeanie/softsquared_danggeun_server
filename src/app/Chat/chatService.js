@@ -6,16 +6,20 @@ const baseResponse = require("../../../config/baseResponseStatus");
 const {response} = require("../../../config/response");
 const {errResponse} = require("../../../config/response");
 
-const userProvider = require("../User/userProvider");
+const articleProvider = require("../Article/articleProvider");
 
 exports.createChat = async function(chatRoomIdx, articleIdx, senderIdx, content) {
     const connection = await pool.getConnection(async (conn) => conn);
     try {
         await connection.beginTransaction();
 
+        // 수신자 = articleIdx를 쓴 사람, chatRoom 만들때 포함시키기
+        var seller = await articleProvider.retrieveUserByArticle(articleIdx);
+        seller = seller[0].userIdx;
+
         if (!chatRoomIdx) {
             // 새로 채팅방 생성
-            const createChatRoom = await chatDao.createChatRoom(connection, articleIdx, senderIdx);
+            const createChatRoom = await chatDao.createChatRoom(connection, articleIdx, senderIdx, seller);
             const newChatRoomIdx = createChatRoom[0].insertId;
             const createChatParams = [newChatRoomIdx, senderIdx, content];
 

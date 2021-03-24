@@ -7,4 +7,7 @@ module.exports = function(app) {
 
     // 34. 채팅 조회 API
     app.get('/app/chat/:chatRoomIdx', jwtMiddleware, chat.getChat);
+
+    // 35. 채팅방 조회 API
+    app.get('/app/chatrooms', jwtMiddleware, chat.getChatRooms);
 };
