@@ -139,7 +139,10 @@ async function selectArticles (connection, latitude, longitude, categoryList, pa
                     LIMIT 0,300) point on point.idx = Article.userIdx
                 WHERE Article.status != 'DELETED' and hide != 'Y' and (`;
     // 카테고리 필터링
-    if (categoryList) {
+
+    if (typeof(categoryList) == "string") {
+        selectArticlesQuery += `categoryIdx = ${categoryList})`
+    } else {
         for (categoryListIdx in categoryList) {
             if (categoryList.length == 1) {
                 selectArticlesQuery += `categoryIdx = ${categoryList[categoryListIdx]})`
@@ -149,7 +152,8 @@ async function selectArticles (connection, latitude, longitude, categoryList, pa
                 selectArticlesQuery += `categoryIdx = ${categoryList[categoryListIdx]} or `;
             }
         }  
-    } 
+    }
+ 
     selectArticlesQuery += ` group by Article.idx
     ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC
     LIMIT ${5 * page - 5}, 5;`;

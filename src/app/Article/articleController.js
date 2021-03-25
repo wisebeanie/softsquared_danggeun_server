@@ -145,7 +145,7 @@ exports.getArticles = async function(req, res) {
     if (!page) {
         page = 1;
     }
-    const categoryList = req.query.categoryIdx;
+    var categoryList = req.query.categoryIdx;
 
     const userIdxFromJWT = req.verifiedToken.userIdx;
     // 현재 로그인 된 유저
@@ -155,20 +155,25 @@ exports.getArticles = async function(req, res) {
         return res.send(response(baseResponse.USER_IDX_NOT_MATCH));
     }
 
-    if (categoryList) {
-        if (typeof(categoryList) == Object) {
-            for (categoryIdx of categoryList) {
-                if (categoryIdx > 15 || categoryIdx < 1) {
-                    return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_WRONG));
-                }
-            }
+    if (!categoryList) {
+        return res.send(response(baseResponse.MODIFY_CATEGORY_IDX_EMPTY));
+    };
+
+
+    if(typeof(categoryList) == "string") {
+        if (categoryList > 15 || categoryList < 1) {
+            return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_WRONG));
         }
-        else {
-            if (categoryList > 15 || categoryList < 1) {
+    } else {
+        for (categoryIdx of categoryList) {
+            if (categoryIdx > 15 || categoryIdx < 1) {
                 return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_WRONG));
             }
         }
     }
+
+
+    
 
     // 로그인 된 유저의 위경도
     const latitude = await userProvider.retrieveLatitude(checkJWT[0].userIdx);
