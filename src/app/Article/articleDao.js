@@ -137,22 +137,25 @@ async function selectArticles (connection, latitude, longitude, categoryList, pa
                     FROM User
                     HAVING distance <= 4
                     LIMIT 0,300) point on point.idx = Article.userIdx
-                WHERE Article.status != 'DELETED' and hide != 'Y'`;
+                WHERE Article.status != 'DELETED' and hide != 'Y' and (`;
     // 카테고리 필터링
     if (categoryList) {
         for (categoryListIdx in categoryList) {
+            console.log(categoryListIdx);
             if (categoryList.length == 1) {
-                selectArticlesQuery += `and categoryIdx = ${categoryList[categoryListIdx]}`
+                selectArticlesQuery += `categoryIdx = ${categoryList[categoryListIdx]})`
             } else if (categoryListIdx == categoryList.length - 1) {
                 selectArticlesQuery += `categoryIdx = ${categoryList[categoryListIdx]})`
             } else {
-                selectArticlesQuery += `and (categoryIdx = ${categoryList[categoryListIdx]} or `;
+                selectArticlesQuery += `categoryIdx = ${categoryList[categoryListIdx]} or `;
             }
         }  
     } 
     selectArticlesQuery += ` group by Article.idx
     ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC
     LIMIT ${5 * page - 5}, 5;`;
+
+    console.log(selectArticlesQuery);
 
     const [selectArticleRows] = await connection.query(selectArticlesQuery, latitude, longitude, categoryList, page);
 

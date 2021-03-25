@@ -147,6 +147,8 @@ exports.getArticles = async function(req, res) {
     }
     const categoryList = req.query.categoryIdx;
 
+    console.log(categoryList);
+
     const userIdxFromJWT = req.verifiedToken.userIdx;
     // 현재 로그인 된 유저
     const token = req.headers['x-access-token'];
@@ -156,7 +158,14 @@ exports.getArticles = async function(req, res) {
     }
 
     if (categoryList) {
-        for (categoryIdx of categoryList) {
+        if (categoryList.length > 1) {
+            for (categoryIdx of categoryList) {
+                if (categoryIdx > 15 || categoryIdx < 1) {
+                    return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_WRONG));
+                }
+            }
+        }
+        else {
             if (categoryIdx > 15 || categoryIdx < 1) {
                 return res.send(response(baseResponse.ARTICLE_CATEGORYIDX_WRONG));
             }
