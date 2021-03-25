@@ -50,6 +50,10 @@ exports.postArticles = async function(req, res) {
         suggestPrice = 'N';
     }
 
+    if (articleImgUrl && typeof(articleImgUrl) == "string") {
+        return res.send(response(baseResponse.ARTICLE_IMG_WRONG));
+    }
+
     const signUpResponse = await articleService.createArticle(userIdx, title, description, articleImgUrl, price, categoryIdx, suggestPrice);
 
     res.send(signUpResponse);
@@ -93,6 +97,10 @@ exports.postLocalAds = async function(req, res) {
 
     if (!regPhoneNumber.test(phoneNumber) && phoneNumber) {
         return res.send(response(baseResponse.LOCALAD_PHONENUMBER_ERROR_TYPE));
+    }
+
+    if (articleImgUrl && typeof(articleImgUrl) == "string") {
+        return res.send(response(baseResponse.ARTICLE_IMG_WRONG));
     }
 
     if (!price) {
@@ -171,9 +179,6 @@ exports.getArticles = async function(req, res) {
             }
         }
     }
-
-
-    
 
     // 로그인 된 유저의 위경도
     const latitude = await userProvider.retrieveLatitude(checkJWT[0].userIdx);
@@ -377,7 +382,12 @@ exports.getSearch = async function(req, res) {
 
     var searchQueryList = searchQuery.split(' ');
 
-    searchQueryList.splice(searchQueryList.indexOf(searchQueryList.length == 0));
+    for (searchWord of searchQueryList) {
+        if (searchWord == '') {
+            searchQueryList.splice(searchQueryList.indexOf(searchWord.length == 0));
+        }
+    }
+
 
     // 로그인 된 유저의 위경도
     const latitude = await userProvider.retrieveLatitude(checkJWT[0].userIdx);
@@ -440,4 +450,14 @@ exports.getBought = async function(req, res) {
     const boughtResult = await articleProvider.retrieveBoughtList(userIdx);
 
     return res.send(boughtResult);
+};
+
+/*
+    API No. 38
+    API Name : 인기 검색어 조회 API
+    [GET] /app/hot-searchwords
+*/
+exports.getHotSearchWord = async function(req, res) {
+    const result = await articleProvider.retrieveHotSearchWord();
+    return res.send(result);
 };

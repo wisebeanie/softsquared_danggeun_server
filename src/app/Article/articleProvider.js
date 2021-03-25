@@ -248,3 +248,60 @@ exports.retrieveBoughtList = async function(userIdx) {
 
     return response(baseResponse.SUCCESS, boughtResult);
 };
+
+exports.retrieveHotSearchWord = async function() {
+    const connection = await pool.getConnection(async (conn) => conn);
+    try {
+        await connection.beginTransaction();
+        // 예전 인기 검색어 순위 테이블 가져오기 
+        const getOldRanking = await articleDao.selectOldRanking(connection);
+
+        // 현재 순위 가져오기
+        const searchWordresult = await articleDao.selectHotSearchWord(connection);
+
+        // 처음 순위 매김
+        if (getOldRanking.length < 1) {
+            for (searchWord of searchWordresult) {
+                // 순위 테이블에 추가
+                const insertRanking = await articleService.insertRanking(searchWord.idx, searchWord.ranking);
+            }
+        } else {
+            // 기존 순위 테이블 삭제
+            const deleteRanking = await articleService.deleteRanking(connection);
+
+            // 새로 순위 테이블에 추가
+            for (searchWord of searchWordresult) {
+                const insertRanking = await articleService.insertRanking(searchWord.idx, searchWord.ranking);
+            }
+            // 순위 변동 조회
+            for (currentSearchWord of searchWordresult) {
+                currentSearchWord.change = 'new';
+                for (oldSearchWord of getOldRanking) {
+                    if (currentSearchWord.idx == oldSearchWord.searchWordIdx) {
+                        // 순위 상승
+                        if ((oldSearchWord.ranking - currentSearchWord.ranking) > 0) {
+                            currentSearchWord.change = `up ${(oldSearchWord.ranking - currentSearchWord.ranking)}`;
+                        }
+                        // 순위 하락
+                        else if ((oldSearchWord.ranking - currentSearchWord.ranking) < 0) {
+                            currentSearchWord.change = `down ${(currentSearchWord.ranking - oldSearchWord.ranking)}`;
+                        }
+                        // 순위 유지
+                        else if ((oldSearchWord.ranking - currentSearchWord.ranking) == 0) {
+                            currentSearchWord.change = `-`;
+                        }
+                    }
+                }
+            }
+        }
+        await connection.commit();
+        connection.release();
+    
+        return response(baseResponse.SUCCESS, searchWordresult);
+    } catch (err) {
+        logger.error(`App - retrieveHotSearchWord Error\n: ${err.message}`);
+        await connection.rollback();
+        connection.release();
+        return errResponse(baseResponse.DB_ERROR);
+    }
+};

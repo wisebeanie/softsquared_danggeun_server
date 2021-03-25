@@ -34,4 +34,7 @@ module.exports = function(app) {
 
     // 37. 구매 내역 조회 API
     app.get('/app/users/:userIdx/bought', jwtMiddleware, article.getBought);
+
+    // 38. 검색어 순위 API
+    app.get('/app/hot-searchwords', article.getHotSearchWord);
 }

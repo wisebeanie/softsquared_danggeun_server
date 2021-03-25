@@ -906,6 +906,48 @@ async function updateSearchWord(connection, searchQuery) {
     return updateResult;
 };
 
+async function selectHotSearchWord(connection) {
+    const selectHotSearchWordQuery = `
+                select idx, searchWord,
+                count,
+                @vRank := @vRank + 1 as ranking
+                    from SearchWord as s, (select @vRank := 0) r order by count DESC
+                LIMIT 0, 15
+                `;
+    const [hotSearchWordRows] = await connection.query(selectHotSearchWordQuery);
+
+    return hotSearchWordRows;
+};
+
+async function selectOldRanking(connection) {
+    const selectOldRankingQuery = `
+                SELECT searchWordIdx, ranking
+                FROM Ranking;
+                `;
+    const [oldRankingRow] = await connection.query(selectOldRankingQuery);
+
+    return oldRankingRow;
+};
+
+async function insertRanking(connection, searchWordIdx, ranking) {
+    const insertRankingQuery = `
+                INSERT INTO Ranking(searchWordIdx, ranking)
+                VALUES(${searchWordIdx}, ${ranking});
+                `;
+    const insertRankingRow = await connection.query(insertRankingQuery, searchWordIdx, ranking);
+
+    return insertRankingRow;
+};
+
+async function deleteRanking(connection) {
+    const deleteRankingQuery = `
+                DELETE FROM Ranking;
+                `;
+    const deleteRankingRow = await connection.query(deleteRankingQuery);
+    
+    return deleteRankingRow;
+};
+
 module.exports = {
     insertArticle,
     insertArticleImg,
@@ -935,5 +977,9 @@ module.exports = {
     selectBoughtArticle,
     selectSearchWord,
     insertSearchWord,
-    updateSearchWord
+    updateSearchWord,
+    selectHotSearchWord,
+    selectOldRanking,
+    insertRanking,
+    deleteRanking
 };

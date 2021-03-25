@@ -115,6 +115,8 @@ module.exports = {
     CHAT_SENDERIDX_EMPTY : { "isSuccess": false, "code": 2074, "message": "senderIdx를 입력해주세요." },
     CHAT_CONTENT_EMPTY : { "isSuccess": false, "code": 2075, "message": "content를 입력해주세요." },
 
+    ARTICLE_IMG_WRONG : { "isSuccess": false, "code": 2076, "message": "이미지는 배열로 입력해주세요." },
+
     // Response error
     ADDRESS_NOT_EXIST : { "isSuccess": false, "code": 3001, "message": "해당 동네는 존재하지 않습니다. 다시 입력해주세요." },
     COUNTRY_NOT_EXIST : { "isSuccess": false, "code": 3002, "message": "해당 국가는 존재하지 않습니다."},
