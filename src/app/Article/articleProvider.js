@@ -50,6 +50,8 @@ exports.retrieveArticle = async function(articleIdx, userIdx) {
     const connection = await pool.getConnection(async (conn) => conn); 
     try {
         await connection.beginTransaction();
+
+        const addView = articleService.addView(articleIdx);
         const articleResult = await articleDao.selectArticleIdx(connection, articleIdx, userIdx);
         const article = articleResult[0];
         
@@ -60,8 +62,6 @@ exports.retrieveArticle = async function(articleIdx, userIdx) {
             imgArray.push(img);
         }
         article.imgUrls = imgArray;
-
-        const addView = articleService.addView(articleIdx);
         
         await connection.commit();
         connection.release();
