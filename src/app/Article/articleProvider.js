@@ -51,7 +51,7 @@ exports.retrieveArticle = async function(articleIdx, userIdx) {
     try {
         await connection.beginTransaction();
 
-        const addView = articleService.addView(articleIdx);
+        const addView = await articleService.addView(articleIdx);
         const articleResult = await articleDao.selectArticleIdx(connection, articleIdx, userIdx);
         const article = articleResult[0];
         
