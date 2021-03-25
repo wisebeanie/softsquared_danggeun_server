@@ -141,7 +141,6 @@ async function selectArticles (connection, latitude, longitude, categoryList, pa
     // 카테고리 필터링
     if (categoryList) {
         for (categoryListIdx in categoryList) {
-            console.log(categoryListIdx);
             if (categoryList.length == 1) {
                 selectArticlesQuery += `categoryIdx = ${categoryList[categoryListIdx]})`
             } else if (categoryListIdx == categoryList.length - 1) {
