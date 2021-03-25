@@ -121,8 +121,8 @@ async function selectArticles (connection, latitude, longitude, categoryList, pa
                         else comments
                         end as commentCount,
                     case when Article.status = 'RESERVED'
-                        then '예약중'
-                        else Article.status
+                            then '예약중'
+                        else '판매중'
                         end as status
                 FROM Article
                     left join User on Article.userIdx = User.idx
@@ -135,9 +135,9 @@ async function selectArticles (connection, latitude, longitude, categoryList, pa
                         -radians(User.longitude))+sin(radians(User.latitude))*sin(radians(${latitude}))))
                         as distance
                     FROM User
-                    HAVING distance <= 4
+                    HAVING distance <= 6
                     LIMIT 0,300) point on point.idx = Article.userIdx
-                WHERE Article.status != 'DELETED' and hide != 'Y' and (`;
+                WHERE Article.status != 'DELETED' and Article.status != 'SOLD' and hide != 'Y' and (`;
     // 카테고리 필터링
 
     if (typeof(categoryList) == "string") {
@@ -231,7 +231,14 @@ async function selectArticleIdx(connection, articleIdx, userIdx) {
                         else price
                         end as price,
                     suggestPrice,
-                    Article.status
+                    case 
+                        when Article.status = 'SALE'
+                            then '판매중'
+                        when Article.status = 'RESERVED'
+                            then '예약중'
+                        when Article.status = 'SOLD'
+                            then '거래완료'
+                        end as status
                 from Article
                     join User on User.idx = Article.userIdx
                     join ArticleCategory on Article.categoryIdx = ArticleCategory.idx
@@ -308,7 +315,17 @@ async function selectLocalAdIdx(connection, articleIdx, userIdx) {
                     else price
                 end as price,
                     noChat,
-                    Article.status
+                    case 
+                        when Article.status = 'SALE'
+                            then '판매중'
+                        when Article.status = 'RESERVED'
+                            then '예약중'
+                        when Article.status = 'SOLD'
+                            then '거래완료'
+                        end as status,
+                    case when isAd = 'Y' and Article.phoneNumber != 'N'
+                        then Article.phoneNumber
+                    end as phoneNumber
                 from Article
                     left join User on User.idx = Article.userIdx
                     left join ArticleCategory on Article.categoryIdx = ArticleCategory.idx

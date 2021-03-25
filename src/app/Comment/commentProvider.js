@@ -34,6 +34,7 @@ exports.retrieveComments = async function (articleIdx) {
         if (nestedCommentsResult.length > 0) {
             var nestedComments = [];
             for (nestedComment of nestedCommentsResult) {
+                console.log(nestedComment);
                 nestedComments.push(nestedComment);
             }
             comment.nestedComments = nestedComments;

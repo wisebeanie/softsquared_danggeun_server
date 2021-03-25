@@ -86,7 +86,9 @@ exports.retrieveLocalAd = async function(articleIdx, userIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
     try {
         await connection.beginTransaction();
-        const localAdResult = await articleDao.selectocalAdIdx(connection, articleIdx, userIdx); 
+
+        const addView = await articleService.addView(articleIdx);
+        const localAdResult = await articleDao.selectLocalAdIdx(connection, articleIdx, userIdx); 
         const localAd = localAdResult[0];
         
         // 이미지 따로 추가
@@ -97,7 +99,6 @@ exports.retrieveLocalAd = async function(articleIdx, userIdx) {
         }
         localAd.imgUrls = imgArray;
         
-        const addView = articleService.addView(articleIdx);
 
         await connection.commit();
         connection.release();
