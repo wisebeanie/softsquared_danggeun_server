@@ -291,6 +291,10 @@ exports.patchArticle = async function(req, res) {
         return res.send(response(baseResponse.MODIFY_LOCALAD_WRONG));
     }
 
+    if (articleImgUrl && typeof(articleImgUrl) == "string") {
+        return res.send(response(baseResponse.ARTICLE_IMG_WRONG));
+    }
+
     if (title.length > 100) {
         return res.send(response(baseResponse.ARTICLE_TITLE_LENGTH));
     } else if (description.length > 200) {

@@ -167,7 +167,7 @@ exports.createBuyer = async function(articleIdx, userIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
     try {
         await connection.beginTransaction();
-        const updateArticleStatus = await this.updateArticleStatus(articleIdx, 'SOLD');
+        const updateArticleStatus = await this.editArticleStatus(articleIdx, 'SOLD');
         const buyerResult = await articleDao.insertBuyer(connection, articleIdx, userIdx);
         await connection.commit();
         connection.release();
@@ -186,7 +186,7 @@ exports.insertRanking = async function(searchWordIdx, ranking, change) {
         const connection = await pool.getConnection(async (conn) => conn);
         const insertRanking = await articleDao.insertRanking(connection, searchWordIdx, ranking ,change);
         connection.release();
-        
+
         return 0;
     } catch (err) {
         logger.error(`APP - insertRanking Service Error\n: ${err.message}`);

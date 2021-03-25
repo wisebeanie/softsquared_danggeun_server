@@ -119,7 +119,7 @@ async function selectChatRoom(connection, userIdx) {
 
 async function selectChatRoomByArticle(connection, articleIdx) {
     const selectChatRoomByArticleQuery = `
-                SELECT nickName,
+                SELECT User.idx, nickName,
                     town,
                     profileImgUrl
                 FROM User

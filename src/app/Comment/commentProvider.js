@@ -25,6 +25,7 @@ exports.retrieveComments = async function (articleIdx) {
         return errResponse(baseResponse.COMMENT_ARTICLE_IS_AD_ERROR);
     }
     const connection = await pool.getConnection(async (conn) => conn);
+
     // 대댓글이 아닌 댓글 조회
     const commentsResult = await commentDao.selectComments(connection, articleIdx);
     for (comment of commentsResult) {
@@ -34,7 +35,6 @@ exports.retrieveComments = async function (articleIdx) {
         if (nestedCommentsResult.length > 0) {
             var nestedComments = [];
             for (nestedComment of nestedCommentsResult) {
-                console.log(nestedComment);
                 nestedComments.push(nestedComment);
             }
             comment.nestedComments = nestedComments;

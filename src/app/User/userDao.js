@@ -236,7 +236,7 @@ async function selectUserByLocation (connection, userIdx, currentLatitude, curre
                 -radians(${userLongitude}))+sin(radians(${userLatitude}))*sin(radians(${currentLatitude})))) as distance
                 FROM User
                 WHERE idx = ${userIdx}
-                HAVING distance <= 0.3
+                HAVING distance <= 1
                 ORDER BY distance 
                 LIMIT 0,300;
                 `;
@@ -326,7 +326,7 @@ async function selectFollow(connection, userIdx, followUserIdx) {
     const selectFollowQuery = `
                 SELECT status, followUserIdx
                 FROM Following
-                WHERE userIdx = ${userIdx} and ${followUserIdx};
+                WHERE userIdx = ${userIdx} and followUserIdx = ${followUserIdx};
                 `;
     const [selectFollowRow] = await connection.query(selectFollowQuery, userIdx);
 

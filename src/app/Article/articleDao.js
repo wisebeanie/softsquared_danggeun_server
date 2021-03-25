@@ -127,9 +127,9 @@ async function selectArticles (connection, latitude, longitude, categoryList, pa
                 FROM Article
                     left join User on Article.userIdx = User.idx
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle where status != 'DELETED' group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as comments from Comment where Comment.status != 'DELETED' group by articleIdx) com on com.articleIdx = Article.idx
                     join (SELECT idx,
                         (6371*acos(cos(radians(User.latitude))*cos(radians(${latitude}))*cos(radians(${longitude})
                         -radians(User.longitude))+sin(radians(User.latitude))*sin(radians(${latitude}))))
@@ -221,7 +221,7 @@ async function selectArticleIdx(connection, articleIdx, userIdx) {
                         end as chatCount,
                     viewed,
                     case
-                        when LikedArticle.userIdx = ${userIdx} and LikedArticle.articleIdx = Article.idx
+                        when LikedArticle.userIdx = ${userIdx} and LikedArticle.articleIdx = Article.idx and LikedArticle.status != 'DELETED'
                             then 'liked'
                         else 'no liked'
                         end as 'likedOrNot',
@@ -242,7 +242,7 @@ async function selectArticleIdx(connection, articleIdx, userIdx) {
                 from Article
                     join User on User.idx = Article.userIdx
                     join ArticleCategory on Article.categoryIdx = ArticleCategory.idx
-                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle where status != 'DELETED' group by articleIdx) l
                                 on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c
                                 on c.articleIdx = Article.idx
@@ -306,7 +306,7 @@ async function selectLocalAdIdx(connection, articleIdx, userIdx) {
                         end as commentCount,
                     viewed,
                     case
-                        when LikedArticle.userIdx = ${userIdx} and LikedArticle.articleIdx = Article.idx
+                        when LikedArticle.userIdx = ${userIdx} and LikedArticle.articleIdx = Article.idx and LikedArticle.status != 'DELETED'
                             then 'liked'
                         else 'no liked'
                         end as 'likedOrNot',
@@ -329,12 +329,12 @@ async function selectLocalAdIdx(connection, articleIdx, userIdx) {
                 from Article
                     left join User on User.idx = Article.userIdx
                     left join ArticleCategory on Article.categoryIdx = ArticleCategory.idx
-                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle where status != 'DELETED' group by articleIdx) l
                                 on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c
                                 on c.articleIdx = Article.idx
                     left join LikedArticle on LikedArticle.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as comments from Comment where status != 'DELETED' group by articleIdx) com on com.articleIdx = Article.idx
                 where Article.idx = ${articleIdx};
                 `;
     const [localAdRow] = await connection.query(selectLocalAdIdxQuery, articleIdx, userIdx);
@@ -481,13 +481,12 @@ async function selectArticleByStatus(connection, userIdx, status) {
                 FROM Article
                     left join User on Article.userIdx = User.idx
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle where status != 'DELETED' group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as comments from Comment where status != 'DELETED' group by articleIdx) com on com.articleIdx = Article.idx
                 WHERE Article.status = '${status}' and Article.userIdx = '${userIdx}' and hide != 'Y'
                 group by Article.idx
-                ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC
-                LIMIT ${5 * page - 5}, 5;
+                ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC;
                 `;
     const [articleBystatusRow] = await connection.query(selectArticleByStatusQuery, userIdx, status);
 
@@ -560,9 +559,9 @@ async function selectHideArticles(connection, userIdx) {
                 FROM Article
                     left join User on Article.userIdx = User.idx
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle where status != 'DELETED' group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as comments from Comment where status != 'DELETED' group by articleIdx) com on com.articleIdx = Article.idx
                 WHERE Article.hide = 'Y' and Article.userIdx = '${userIdx}' and Article.status != 'DELETED'
                 group by Article.idx
                 ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC;
@@ -635,9 +634,9 @@ async function selectSalesUserIdx(connection, userIdx) {
                     FROM Article
                         left join User on Article.userIdx = User.idx
                         left join ArticleImg on ArticleImg.articleIdx = Article.idx
-                        left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                        left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle where status != 'DELETED' group by articleIdx) l on l.articleIdx = Article.idx
                         left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                        left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                        left join (select articleIdx, COUNT(idx) as comments from Comment where status != 'DELETED' group by articleIdx) com on com.articleIdx = Article.idx
                     WHERE Article.userIdx = ? and hide != 'Y' and Article.status != 'DELETED'
                     group by Article.idx
                     ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC;
@@ -722,7 +721,7 @@ async function searchArticles(connection, page, searchQueryList, latitude, longi
                 FROM Article
                     left join User on Article.userIdx = User.idx
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle where status != 'DELETED' group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
                     join (SELECT idx,
                         (6371*acos(cos(radians(User.latitude))*cos(radians(${latitude}))*cos(radians(${longitude})
@@ -788,9 +787,9 @@ async function selectFollowUsersArticles(connection, userIdx) {
                 FROM Article
                     left join User on Article.userIdx = User.idx
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle where status != 'DELETED' group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as comments from Comment where status != 'DELETED' group by articleIdx) com on com.articleIdx = Article.idx
                     join Following on Following.followUserIdx = User.idx
                 WHERE Article.status != 'DELETED' and hide != 'Y' and Following.userIdx = ?
                 group by Article.idx;
@@ -880,9 +879,9 @@ async function selectBoughtArticle(connection, userIdx) {
                 FROM Article
                     left join User on Article.userIdx = User.idx
                     left join ArticleImg on ArticleImg.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle group by articleIdx) l on l.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(articleIdx) as liked from LikedArticle where status != 'DELETED' group by articleIdx) l on l.articleIdx = Article.idx
                     left join (select articleIdx, COUNT(idx) as chat from ChatRoom group by articleIdx) c on c.articleIdx = Article.idx
-                    left join (select articleIdx, COUNT(idx) as comments from Comment group by articleIdx) com on com.articleIdx = Article.idx
+                    left join (select articleIdx, COUNT(idx) as comments from where status != 'DELETED' Comment group by articleIdx) com on com.articleIdx = Article.idx
                     join (select userIdx, articleIdx from BoughtArticle where userIdx = ?) d on d.articleIdx = Article.idx
                     group by Article.idx;
                 `;
