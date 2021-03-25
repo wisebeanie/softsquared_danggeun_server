@@ -154,8 +154,6 @@ async function selectArticles (connection, latitude, longitude, categoryList, pa
     ORDER BY pullUpStatus = 'N' ,Article.updatedAt DESC
     LIMIT ${5 * page - 5}, 5;`;
 
-    console.log(selectArticlesQuery);
-
     const [selectArticleRows] = await connection.query(selectArticlesQuery, latitude, longitude, categoryList, page);
 
     return selectArticleRows;
