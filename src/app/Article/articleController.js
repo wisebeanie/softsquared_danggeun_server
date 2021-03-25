@@ -9,6 +9,8 @@ const commentProvider = require("../Comment/commentProvider");
 
 var regPhoneNumber = /^\d{3}\d{3,4}\d{4}$/;
 
+const schedule = require('node-schedule');
+
 /*
     API No. 8
     판매 글 생성 API
@@ -452,6 +454,11 @@ exports.getBought = async function(req, res) {
     return res.send(boughtResult);
 };
 
+
+var j = schedule.scheduleJob('* * 7 * * *', async function() {
+    const article = await articleProvider.hotSearchWord()
+});
+
 /*
     API No. 38
     API Name : 인기 검색어 조회 API
@@ -459,5 +466,6 @@ exports.getBought = async function(req, res) {
 */
 exports.getHotSearchWord = async function(req, res) {
     const result = await articleProvider.retrieveHotSearchWord();
+    // const result = await articleProvider.hotSearchWord();
     return res.send(result);
 };

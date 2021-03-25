@@ -181,12 +181,12 @@ exports.createBuyer = async function(articleIdx, userIdx) {
     }
 };
 
-exports.insertRanking = async function(searchWordIdx, ranking) {
+exports.insertRanking = async function(searchWordIdx, ranking, change) {
     try {
         const connection = await pool.getConnection(async (conn) => conn);
-        const insertRanking = await articleDao.insertRanking(connection, searchWordIdx, ranking);
-
+        const insertRanking = await articleDao.insertRanking(connection, searchWordIdx, ranking ,change);
         connection.release();
+        
         return 0;
     } catch (err) {
         logger.error(`APP - insertRanking Service Error\n: ${err.message}`);
@@ -206,3 +206,17 @@ exports.deleteRanking = async function() {
         return 0;
     }
 };
+
+exports.updateChange = async function(searchWordIdx, change) {
+    try {
+        const connection = await pool.getConnection(async (conn) => conn);
+        const updateChange = await articleDao.updateChange(connection, searchWordIdx, change);
+        connection.release();
+
+        return 0;
+    }
+    catch (err) {
+        logger.error(`APP - updateChange Service Error\n: ${err.message}`);
+        return 0;
+    }
+}

@@ -6,6 +6,7 @@ const baseResponse = require("../../../config/baseResponseStatus");
 const articleDao = require("./articleDao");
 const articleService = require("./articleService");
 
+
 exports.categoryImgCheck = async function(categoryIdx) {
     const connection = await pool.getConnection(async (conn) => conn);
     const categoryImgCheckResult = await articleDao.selectCategoryImg(connection, categoryIdx);
@@ -249,7 +250,7 @@ exports.retrieveBoughtList = async function(userIdx) {
     return response(baseResponse.SUCCESS, boughtResult);
 };
 
-exports.retrieveHotSearchWord = async function() {
+exports.hotSearchWord = async function() {
     const connection = await pool.getConnection(async (conn) => conn);
     try {
         await connection.beginTransaction();
@@ -257,13 +258,15 @@ exports.retrieveHotSearchWord = async function() {
         const getOldRanking = await articleDao.selectOldRanking(connection);
 
         // 현재 순위 가져오기
-        const searchWordresult = await articleDao.selectHotSearchWord(connection);
+        const searchWordresult = await articleDao.selectHotSearchWord(connection);  
+
+        var change = 'new';
 
         // 처음 순위 매김
         if (getOldRanking.length < 1) {
             for (searchWord of searchWordresult) {
                 // 순위 테이블에 추가
-                const insertRanking = await articleService.insertRanking(searchWord.idx, searchWord.ranking);
+                const insertRanking = await articleService.insertRanking(searchWord.idx, searchWord.ranking, change);
             }
         } else {
             // 기존 순위 테이블 삭제
@@ -271,37 +274,52 @@ exports.retrieveHotSearchWord = async function() {
 
             // 새로 순위 테이블에 추가
             for (searchWord of searchWordresult) {
-                const insertRanking = await articleService.insertRanking(searchWord.idx, searchWord.ranking);
+                const insertRanking = await articleService.insertRanking(searchWord.idx, searchWord.ranking, change);
             }
+
+            
             // 순위 변동 조회
             for (currentSearchWord of searchWordresult) {
-                currentSearchWord.change = 'new';
                 for (oldSearchWord of getOldRanking) {
                     if (currentSearchWord.idx == oldSearchWord.searchWordIdx) {
                         // 순위 상승
                         if ((oldSearchWord.ranking - currentSearchWord.ranking) > 0) {
-                            currentSearchWord.change = `up ${(oldSearchWord.ranking - currentSearchWord.ranking)}`;
+                            change = `up ${(oldSearchWord.ranking - currentSearchWord.ranking)}`;
+                            const insertChange = await articleService.updateChange(currentSearchWord.idx, change);
                         }
                         // 순위 하락
                         else if ((oldSearchWord.ranking - currentSearchWord.ranking) < 0) {
-                            currentSearchWord.change = `down ${(currentSearchWord.ranking - oldSearchWord.ranking)}`;
+                            change = `down ${(currentSearchWord.ranking - oldSearchWord.ranking)}`;
+                            const insertChange = await articleService.updateChange(currentSearchWord.idx, change);
                         }
                         // 순위 유지
                         else if ((oldSearchWord.ranking - currentSearchWord.ranking) == 0) {
-                            currentSearchWord.change = `-`;
+                            change = `-`;
+                            const updateChange = await articleService.updateChange(currentSearchWord.idx, change);
                         }
                     }
                 }
             }
         }
+        const searchResult = await articleDao.selectRanking(connection);  
         await connection.commit();
         connection.release();
     
-        return response(baseResponse.SUCCESS, searchWordresult);
+        // return response(baseResponse.SUCCESS, searchResult);
+        return 0;
     } catch (err) {
         logger.error(`App - retrieveHotSearchWord Error\n: ${err.message}`);
         await connection.rollback();
         connection.release();
-        return errResponse(baseResponse.DB_ERROR);
+        return 0;
     }
+};
+
+exports.retrieveHotSearchWord = async function() {
+
+    const connection = await pool.getConnection(async (conn) => conn);
+    const searchWordresult = await articleDao.selectRanking(connection);  
+    connection.release();
+
+    return response(baseResponse.SUCCESS, searchWordresult);
 };

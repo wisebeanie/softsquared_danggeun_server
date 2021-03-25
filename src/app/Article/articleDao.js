@@ -921,7 +921,7 @@ async function selectHotSearchWord(connection) {
 
 async function selectOldRanking(connection) {
     const selectOldRankingQuery = `
-                SELECT searchWordIdx, ranking
+                SELECT searchWordIdx, ranking, changes
                 FROM Ranking;
                 `;
     const [oldRankingRow] = await connection.query(selectOldRankingQuery);
@@ -929,12 +929,12 @@ async function selectOldRanking(connection) {
     return oldRankingRow;
 };
 
-async function insertRanking(connection, searchWordIdx, ranking) {
+async function insertRanking(connection, searchWordIdx, ranking, change) {
     const insertRankingQuery = `
-                INSERT INTO Ranking(searchWordIdx, ranking)
-                VALUES(${searchWordIdx}, ${ranking});
+                INSERT INTO Ranking(searchWordIdx, ranking, changes)
+                VALUES(${searchWordIdx}, ${ranking}, '${change}');
                 `;
-    const insertRankingRow = await connection.query(insertRankingQuery, searchWordIdx, ranking);
+    const insertRankingRow = await connection.query(insertRankingQuery, searchWordIdx, ranking, change);
 
     return insertRankingRow;
 };
@@ -946,6 +946,32 @@ async function deleteRanking(connection) {
     const deleteRankingRow = await connection.query(deleteRankingQuery);
     
     return deleteRankingRow;
+};
+
+async function updateChange(connection, searchWordIdx, change) {
+    const updateChangeQuery = `
+                UPDATE Ranking
+                SET changes = '${change}'
+                WHERE searchWordIdx = ${searchWordIdx};
+                `;
+    const updateChangeRow = await connection.query(updateChangeQuery, searchWordIdx, change);
+
+    return updateChangeRow;
+};
+
+async function selectRanking(connection) {
+    const selectRankingQuery = `
+                SELECT searchWord, ranking,
+                case when changes is null or changes = ""
+                    then 'new'
+                    else changes
+                end as changes
+                FROM Ranking
+                    join SearchWord on SearchWord.idx = Ranking.searchWordIdx
+                group by searchWordIdx;
+                `;
+    const [rankingRow] = await connection.query(selectRankingQuery);
+    return rankingRow;
 };
 
 module.exports = {
@@ -981,5 +1007,7 @@ module.exports = {
     selectHotSearchWord,
     selectOldRanking,
     insertRanking,
-    deleteRanking
+    deleteRanking,
+    updateChange,
+    selectRanking
 };
